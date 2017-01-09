@@ -55,5 +55,7 @@ _layouts:
 collections:
   - layout: *cabinet44
     name: Box 1
+    id: "44_1"
   - layout: *cabinet64
     name: Box 2
+    id: "64_1"

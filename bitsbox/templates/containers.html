@@ -22,7 +22,7 @@
       margin: {{ layout.margin | default('auto') }};
       width: {{ layout.width | default('auto') }};
       height: {{ layout.height | default('auto') }};">
-    <p>{{ path | join('.') }}</p>
+    <p>{{ path | join('_') }}</p>
   </div>
 {% endif %}
 {% endmacro %}
@@ -33,7 +33,7 @@
 {% with layout = collection.layout %}
   <div class="bb-container-toplevel">
     <div class="bb-container-toplevel-interior z-depth-2 grey lighten-1">
-      {{ render_layout([collection.name], layout) }}
+      {{ render_layout([collection.id], layout) }}
     </div>
   </div>
 {% endwith %}
