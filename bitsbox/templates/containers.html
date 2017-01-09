@@ -1,0 +1,43 @@
+{% extends "_layout/base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/container.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{% macro render_layout(path, layout) %}
+{% if layout.type == 'container' %}
+  <div class="bb-container" style="
+      flex-flow: {{ layout.flow | default('row nowrap') }};
+      margin: {{ layout.margin | default('auto') }};
+      width: {{ layout.width | default('auto') }};
+      height: {{ layout.height | default('auto') }};">
+    {% for item in layout['items'] %}
+      {{ render_layout(path + [loop.index0], item) }}
+    {% endfor %}
+  </div>
+{% elif layout.type == 'item' %}
+  <div class="bb-container-item grey lighten-2 z-depth-1" style="flex-grow: 1;
+      margin: {{ layout.margin | default('auto') }};
+      width: {{ layout.width | default('auto') }};
+      height: {{ layout.height | default('auto') }};">
+    <p>{{ path | join('.') }}</p>
+  </div>
+{% endif %}
+{% endmacro %}
+
+{% for collection in collections %}
+<div>
+  <h4>{{ collection.name }}</h4>
+{% with layout = collection.layout %}
+  <div class="bb-container-toplevel">
+    <div class="bb-container-toplevel-interior z-depth-2 grey lighten-1">
+      {{ render_layout([collection.name], layout) }}
+    </div>
+  </div>
+{% endwith %}
+</div>
+{% endfor %}
+
+{% endblock %}

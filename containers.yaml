@@ -1,0 +1,59 @@
+_layouts:
+  - &boxmd
+    type: item
+    width: 11em
+    height: 5.5em
+    margin: 0.5em
+  - &boxsm
+    type: item
+    width: 5em
+    height: 3.8em
+    margin: 0.5em
+  - &row4
+    type: container
+    items:
+      - *boxmd
+      - *boxmd
+      - *boxmd
+      - *boxmd
+  - &row8
+    type: container
+    items:
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+  - &cabinet44
+    type: container
+    flow: column nowrap
+    margin: 0.5em
+    items:
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row4
+      - *row4
+      - *row4
+  - &cabinet64
+    type: container
+    flow: column nowrap
+    margin: 0.5em
+    items:
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+collections:
+  - layout: *cabinet44
+    name: Box 1
+  - layout: *cabinet64
+    name: Box 2
