@@ -1,11 +1,18 @@
+import json
+
 from flask import Blueprint, render_template
-import yaml
 
-ui = Blueprint('ui', __name__)
+from .model import get_db
 
-with open('containers.yaml') as f:
-    COLLECTIONS = yaml.load(f)['collections']
+blueprint = Blueprint('ui', __name__)
 
-@ui.route('/')
+@blueprint.route('/')
 def index():
-    return render_template('containers.html', collections=COLLECTIONS)
+    db = get_db()
+    cabinets = db.execute(
+        'SELECT name, layout AS "layout [json]" FROM cabinets')
+    return render_template('cabinets.html', cabinets=cabinets)
+
+@blueprint.app_template_filter('fromjson')
+def fromjson_filter(s):
+    return json.loads(s)

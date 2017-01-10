@@ -1,11 +1,11 @@
 _layouts:
   - &boxmd
-    type: item
+    type: drawer
     width: 11em
     height: 5.5em
     margin: 0.5em
   - &boxsm
-    type: item
+    type: drawer
     width: 5em
     height: 3.8em
     margin: 0.5em
@@ -52,10 +52,8 @@ _layouts:
       - *row8
       - *row8
       - *row8
-collections:
+cabinets:
   - layout: *cabinet44
-    name: Box 1
-    id: "44_1"
+    name: Albion
   - layout: *cabinet64
-    name: Box 2
-    id: "64_1"
+    name: Londinium

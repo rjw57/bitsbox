@@ -1,7 +1,7 @@
 {% extends "_layout/base.html" %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/container.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cabinet.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -17,23 +17,23 @@
       {{ render_layout(path + [loop.index0], item) }}
     {% endfor %}
   </div>
-{% elif layout.type == 'item' %}
+{% elif layout.type == 'drawer' %}
   <div class="bb-container-item grey lighten-2 z-depth-1" style="flex-grow: 1;
       margin: {{ layout.margin | default('auto') }};
       width: {{ layout.width | default('auto') }};
       height: {{ layout.height | default('auto') }};">
-    <p>{{ path | join('_') }}</p>
+    <p>{{ path | join('.') }}</p>
   </div>
 {% endif %}
 {% endmacro %}
 
-{% for collection in collections %}
+{% for cabinet in cabinets %}
 <div>
-  <h4>{{ collection.name }}</h4>
-{% with layout = collection.layout %}
+  <h4>{{ cabinet.name }}</h4>
+{% with layout = cabinet.layout | fromjson %}
   <div class="bb-container-toplevel">
     <div class="bb-container-toplevel-interior z-depth-2 grey lighten-1">
-      {{ render_layout([collection.id], layout) }}
+      {{ render_layout([], layout) }}
     </div>
   </div>
 {% endwith %}
