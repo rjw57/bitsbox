@@ -8,26 +8,25 @@
 
 {% macro render_layout(path, layout) %}
 {% if layout.type == 'container' %}
-  <div class="bb-container" style="
-      flex-flow: {{ layout.flow | default('row nowrap') }};
-      margin: {{ layout.margin | default('auto') }};
-      width: {{ layout.width | default('auto') }};
-      height: {{ layout.height | default('auto') }};">
-    {% for item in layout['items'] %}
+  <div class="bb-container {{ layout.class }}" style="{{ layout.style }}">
+    {% for item in layout.children %}
       {{ render_layout(path + [loop.index0], item) }}
     {% endfor %}
   </div>
-{% elif layout.type == 'drawer' %}
-  {% with drawer = drawers[path | join('.')] %}
-  <div class="bb-container-drawer grey lighten-2"
-      style="flex-grow: 1;
-        margin: {{ layout.margin | default('auto') }};
-        width: {{ layout.width | default('auto') }};
-        height: {{ layout.height | default('auto') }};">
-    <a href="{{ drawer.href | default('#') }}"
+{% elif layout.type == 'item' %}
+  {% with drawer = drawers_by_path[path | join('.')] %}
+  <div class="bb-container-drawer grey lighten-2 {{ layout.class }}"
+       style="{{ layout.style }}">
+    {% if drawer %}
+    <a href="{{ url_for('ui.drawer', drawer_id=drawer.id) }}"
         class="waves-effect" style="width: 100%; height: 100%">
       <div class="label">{{ drawer.label }}</div>
+      <div class="count">
+        {{ drawer.contents_count }},
+        {{ drawer.collections_count }}
+      </div>
     </a>
+    {% endif %}
   </div>
   {% endwith %}
 {% endif %}

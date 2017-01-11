@@ -1,24 +1,20 @@
-_layouts:
+_specs:
   - &boxmd
-    type: drawer
-    width: 11em
-    height: 5.5em
-    margin: 0.5em
+    type: item
+    style: 'width: 11em; height: 5.5em; margin: 0.5em'
   - &boxsm
-    type: drawer
-    width: 5em
-    height: 3.8em
-    margin: 0.5em
+    type: item
+    style: 'width: 5em; height: 3.8em; margin: 0.5em'
   - &row4
     type: container
-    items:
+    children:
       - *boxmd
       - *boxmd
       - *boxmd
       - *boxmd
   - &row8
     type: container
-    items:
+    children:
       - *boxsm
       - *boxsm
       - *boxsm
@@ -29,9 +25,8 @@ _layouts:
       - *boxsm
   - &cabinet44
     type: container
-    flow: column nowrap
-    margin: 0.5em
-    items:
+    style: 'flex-flow: column nowrap; margin: 0.5em'
+    children:
       - *row8
       - *row8
       - *row8
@@ -41,9 +36,8 @@ _layouts:
       - *row4
   - &cabinet64
     type: container
-    flow: column nowrap
-    margin: 0.5em
-    items:
+    style: 'flex-flow: column nowrap; margin: 0.5em'
+    children:
       - *row8
       - *row8
       - *row8
@@ -52,8 +46,8 @@ _layouts:
       - *row8
       - *row8
       - *row8
-cabinets:
-  - layout: *cabinet44
-    name: Albion
-  - layout: *cabinet64
-    name: Londinium
+layouts:
+  - spec: *cabinet44
+    name: "44 drawer"
+  - spec: *cabinet64
+    name: "64 drawer"
