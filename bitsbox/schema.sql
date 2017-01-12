@@ -75,15 +75,15 @@ create table drawers (
     foreign key(location_id) references locations(id)
 );
 
--- A collection exists within a drawer. More than one collection may be within a
--- drawer.
+-- A collection exists (optionally) within a drawer. More than one collection
+-- may be within a drawer.
 drop table if exists collections;
 create table collections (
     id integer primary key autoincrement,
     name text not null,
     description text not null,
     contents_count integer not null,
-    drawer_id integer not null,
+    drawer_id integer,
 
     foreign key(drawer_id) references drawers(id)
 );

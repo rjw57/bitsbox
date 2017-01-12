@@ -1,0 +1,36 @@
+{% extends "_layout/base.html" %}
+
+{% block content %}
+
+<form action="{{ url_for('ui.collection_create') }}" method="post">
+  <div class="mdl-grid">
+    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--4-col">
+      <input class="mdl-textfield__input" type="text" id="name" name="name"
+             required>
+      <label class="mdl-textfield__label" for="name">Name</label>
+    </div>
+    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--7-col">
+      <input class="mdl-textfield__input" type="text" id="description"
+             name="description" required>
+      <label class="mdl-textfield__label" for="description">
+        Description
+      </label>
+    </div>
+    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--1-col">
+      <input class="mdl-textfield__input" type="number" id="count"
+             name="count" min="0" required>
+      <label class="mdl-textfield__label" for="count">
+        Count
+      </label>
+    </div>
+  </div>
+  <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+      <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
+        Create collection
+      </button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

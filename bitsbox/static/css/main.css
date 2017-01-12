@@ -1,0 +1,20 @@
+.page-content {
+    max-width: 960px;
+    margin: auto auto;
+}
+
+.fab {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+}
+
+.collection-card {
+    display: block;
+    text-decoration: inherit;
+    color: inherit;
+}
+
+.collection-card:hover {
+    background-color: #e0e0e0 !important;
+}

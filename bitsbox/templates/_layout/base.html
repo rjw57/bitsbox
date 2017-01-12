@@ -1,43 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>{% block title %}{{ config.title }}{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css" media="screen,projecstion"/>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    {% block meta %}{% endblock %}
+
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en"
+      rel="stylesheet">
+    <link
+      href="https://code.getmdl.io/1.3.0/material.blue_grey-indigo.min.css"
+      rel="stylesheet">
+    <link
+      href="{{ url_for('static', filename='css/main.css') }}"
+      rel="stylesheet">
     {% block styles %}{% endblock %}
+
     {% block head %}{% endblock %}
   </head>
 
   <body>
     {% block body %}
-    <nav>
-      <div class="nav-wrapper container">
-        <a href="{{ url_for('ui.index') }}" class="brand-logo">Bitsbox</a>
-        {#
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="sass.html">Sass</a></li>
-          <li><a href="badges.html">Components</a></li>
-          <li><a href="collapsible.html">JavaScript</a></li>
-        </ul>
-        #}
-      </div>
-    </nav>
-    <div class="container">{% block content %}{% endblock %}</div>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <span class="mdl-layout-title">Bitsbox</span>
+        </div>
+        <div class="mdl-layout-spacer"></div>
+        <nav class="mdl-navigation">
+          {# TODO:
+          <a class="mdl-navigation__link" href="">Containers</a>
+          #}
+        </nav>
+      </header>
+
+      {% block main %}
+      <main class="mdl-layout__content">
+        <div class="page-content">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+      {% endblock %}
+    </div>
+
+    {# Snackbar #}
+    <div aria-live="assertive" aria-atomic="true" aria-relevant="text"
+         class="mdl-snackbar mdl-js-snackbar">
+      <div class="mdl-snackbar__text"></div>
+      <button type="button" class="mdl-snackbar__action"></button>
+    </div>
+
+    <div id="messages" style="display: none">
+      {{ get_flashed_messages() | join(', ') }}
+    </div>
+
     {% endblock %}
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <script type="text/javascript">
-    $(document).ready(function() {
-      {% for message in messages %}
-      Materialize.toast('{{ message }}', 5000);
-      {% endfor %}
-    });
-    </script>
-    {% endif %}
-    {% endwith %}
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     {% block scripts %}{% endblock %}
+    <script>
+      $(window).load(function() {
+        var notification = document.querySelector('.mdl-js-snackbar');
+        var messages = $('#messages').text().trim();
+        if(messages !== '') {
+          notification.MaterialSnackbar.showSnackbar({ message: messages });
+        }
+      });
+    </script>
   </body>
 </html>
