@@ -31,14 +31,20 @@
       <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">Bitsbox</span>
+          <div class="mdl-layout-spacer"></div>
+          <nav class="mdl-navigation mdl-layout--large-screen-only">
+            <a class="mdl-navigation__link"
+               href="{{ url_for('ui.collections') }}">Collections</a>
+          </nav>
         </div>
-        <div class="mdl-layout-spacer"></div>
-        <nav class="mdl-navigation">
-          {# TODO:
-          <a class="mdl-navigation__link" href="">Containers</a>
-          #}
-        </nav>
       </header>
+      <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Bitsbox</span>
+        <nav class="mdl-navigation">
+          <a class="mdl-navigation__link"
+             href="{{ url_for('ui.collections') }}">Collections</a>
+        </nav>
+      </div>
 
       {% block main %}
       <main class="mdl-layout__content">
