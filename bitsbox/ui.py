@@ -4,7 +4,7 @@ from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash
 )
 
-from .model import get_db
+from .db import get_db
 
 blueprint = Blueprint('ui', __name__)
 

@@ -1,0 +1,11 @@
+- model: bitsbox.model.Cabinet
+  records:
+    - id: 1
+      name: cabinet 1
+      layout_id: 1
+    - id: 2
+      name: cabinet 2
+      layout_id: 2
+    - id: 3
+      name: cabinet 3
+      layout_id: 2

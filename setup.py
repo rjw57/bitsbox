@@ -2,7 +2,22 @@ from setuptools import setup, find_packages
 
 install_requires = """
     flask
+    flask-graphql
+    flask-shell-ipython
+    flask-sqlalchemy
+
+    graphene>=1.0
+    graphene_sqlalchemy
+    sqlalchemy
+
+    python-dateutil
     pyyaml
+""".split()
+
+tests_require = """
+    flask-fixtures
+    flask-testing
+    nose
 """.split()
 
 setup(
@@ -10,4 +25,6 @@ setup(
     packages=find_packages(),
 
     install_requires=install_requires,
+    tests_require=tests_require,
+    test_suite='nose.collector',
 )

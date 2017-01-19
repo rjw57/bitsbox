@@ -1,0 +1,56 @@
+- model: bitsbox.model.Layout
+  _specs:
+  - &boxmd
+    type: item
+    style: 'width: 11em; height: 5.5em; margin: 0.5em'
+  - &boxsm
+    type: item
+    style: 'width: 5em; height: 3.8em; margin: 0.5em'
+  - &row4
+    type: container
+    children:
+      - *boxmd
+      - *boxmd
+      - *boxmd
+      - *boxmd
+  - &row8
+    type: container
+    children:
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+      - *boxsm
+  - &cabinet44
+    type: container
+    style: 'flex-flow: column nowrap; margin: 0.5em'
+    children:
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row4
+      - *row4
+      - *row4
+  - &cabinet64
+    type: container
+    style: 'flex-flow: column nowrap; margin: 0.5em'
+    children:
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+      - *row8
+  records:
+    - id: 1
+      spec: *cabinet44
+      name: "44 drawer"
+    - id: 2
+      spec: *cabinet64
+      name: "64 drawer"
