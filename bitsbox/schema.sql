@@ -82,7 +82,7 @@ create table collections (
     id integer primary key autoincrement,
     name text not null,
     description text not null,
-    contents_count integer not null,
+    content_count integer not null,
     drawer_id integer,
 
     foreign key(drawer_id) references drawers(id)

@@ -4,7 +4,7 @@ from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash
 )
 
-from .db import get_db
+from .model import db, Collection
 
 blueprint = Blueprint('ui', __name__)
 
@@ -14,26 +14,8 @@ def index():
 
 @blueprint.route('/collections')
 def collections():
-    db = get_db()
     context = {
-        'collections': db.execute('''
-            SELECT
-                collections.id AS collection_id, collections.name AS name,
-                collections.description AS description,
-                collections.contents_count AS contents_count,
-                drawers.id AS drawer_id, drawers.label AS drawer_label,
-                cabinets.id AS cabinet_id, cabinets.name AS cabinet_name
-            FROM
-                collections
-            LEFT OUTER JOIN
-                drawers ON drawers.id = collections.drawer_id
-            LEFT OUTER JOIN
-                locations ON drawers.location_id = locations.id
-            LEFT OUTER JOIN
-                cabinets ON locations.cabinet_id = cabinets.id
-            ORDER BY
-                name, collection_id
-        '''),
+        'collections': Collection.query.order_by(Collection.name),
     }
     return render_template('collections.html', **context)
 
@@ -41,8 +23,6 @@ def collections():
 def collection_create():
     if request.method == 'GET':
         return render_template('collection_create.html')
-
-    db = get_db()
 
     # This is the POST request, extract the form values
     name = request.values.get('name', '')
@@ -53,16 +33,13 @@ def collection_create():
     if description == '':
         abort(400)
 
-    contents_count = int(request.values.get('count', 0))
+    content_count = int(request.values.get('count', 0))
 
     # Create the collection
-    db.execute('''
-        INSERT INTO
-            collections (name, description, contents_count)
-        VALUES
-            (?, ?, ?)
-    ''', (name, description, contents_count))
-    db.commit()
+    collection = Collection(
+        name=name, description=description, content_count=content_count)
+    db.session.add(collection)
+    db.session.commit()
 
     flash('Collection "{}" created'.format(name))
 
@@ -98,12 +75,12 @@ def cabinets():
                     drawers.label AS label,
                     IFNULL(
                         (
-                            SELECT SUM(collections.contents_count)
+                            SELECT SUM(collections.content_count)
                             FROM collections
                             WHERE collections.drawer_id = drawers.id
                         ),
                         0
-                    ) AS contents_count,
+                    ) AS content_count,
                     (
                         SELECT COUNT(1)
                         FROM collections
@@ -159,7 +136,7 @@ def drawer(drawer_id):
                 id AS collection_id,
                 name,
                 description,
-                contents_count
+                content_count
             FROM
                 collections
             WHERE
