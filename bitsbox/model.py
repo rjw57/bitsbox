@@ -62,6 +62,22 @@ class Cabinet(db.Model):
     layout = relationship('Layout', back_populates='cabinets')
     locations = relationship('Location', back_populates='cabinet')
 
+    def add_locations(self, session):
+        for item in LayoutItem.query.filter_by(layout=self.layout):
+            session.add(Location(cabinet=self, layout_item=item))
+
+    @classmethod
+    def create_from_layout(cls, session, layout, name=None):
+        """Convenience function to create a cabinet, create locations from the
+        layout and to put a drawer in each location.
+
+        """
+        c = Cabinet(name=name, layout=layout)
+        c.add_locations(session)
+        Drawer.create_for_cabinet_locations(session, c)
+        session.add(c)
+        return c
+
 class LayoutItem(db.Model):
     __tablename__ = 'layout_items'
 
@@ -82,6 +98,7 @@ class Location(db.Model):
 
     cabinet = relationship('Cabinet', back_populates='locations')
     layout_item = relationship('LayoutItem')
+    drawer = relationship('Drawer', back_populates='location', uselist=False)
 
 class Drawer(db.Model):
     __tablename__ = 'drawers'
@@ -90,3 +107,23 @@ class Drawer(db.Model):
     label = db.Column(db.Unicode)
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
 
+    location = relationship('Location', back_populates='drawer')
+    collections = relationship('Collection', back_populates='drawer')
+
+    @classmethod
+    def create_for_cabinet_locations(cls, session, cabinet):
+        locations = Location.query.filter_by(cabinet=cabinet).\
+            join(Location.layout_item).order_by(LayoutItem.spec_item_path)
+        for idx, l in enumerate(locations):
+            session.add(Drawer(label=str(idx), location=l))
+
+class Collection(db.Model):
+    __tablename__ = 'collections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode)
+    description = db.Column(db.Unicode)
+    content_count = db.Column(db.Integer)
+    drawer_id = db.Column(db.Integer, db.ForeignKey('drawers.id'))
+
+    drawer = relationship('Drawer', back_populates='collections')
