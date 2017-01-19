@@ -1,10 +1,10 @@
 import json
-
 from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash
 )
+from sqlalchemy.orm import joinedload
 
-from .model import db, Collection
+from .model import db, Collection, Cabinet
 
 blueprint = Blueprint('ui', __name__)
 
@@ -47,55 +47,42 @@ def collection_create():
 
 @blueprint.route('/cabinets')
 def cabinets():
-    db = get_db()
-
     context = {
-        'cabinets': db.execute('''
-            SELECT
-                cabinets.id AS id,
-                cabinets.name AS name,
-                layouts.spec AS layout
-            FROM
-                cabinets JOIN layouts
-            ON
-                cabinets.layout_id = layouts.id
-            ORDER BY
-                cabinets.name
-        '''),
-        'drawers_by_path': dict(
-            (row[0], row) for row in db.execute('''
-                SELECT
-                    (
-                        SELECT
-                            locations.cabinet_id || '.' || group_concat(value, '.')
-                        FROM
-                            json_each(layout_items.spec_item_path)
-                    ) AS path,
-                    drawers.id AS id,
-                    drawers.label AS label,
-                    IFNULL(
-                        (
-                            SELECT SUM(collections.content_count)
-                            FROM collections
-                            WHERE collections.drawer_id = drawers.id
-                        ),
-                        0
-                    ) AS content_count,
-                    (
-                        SELECT COUNT(1)
-                        FROM collections
-                        WHERE collections.drawer_id = drawers.id
-                    ) AS collections_count
-                FROM
-                    drawers
-                JOIN
-                    locations ON drawers.location_id = locations.id
-                JOIN
-                    layout_items ON locations.layout_item_id = layout_items.id
-                WHERE
-                    drawers.location_id IS NOT NULL
-            ''')
-        ),
+        'cabinets': Cabinet.query.options(joinedload(Cabinet.layout)),
+#        'drawers_by_path': dict(
+#            (row[0], row) for row in db.execute('''
+#                SELECT
+#                    (
+#                        SELECT
+#                            locations.cabinet_id || '.' || group_concat(value, '.')
+#                        FROM
+#                            json_each(layout_items.spec_item_path)
+#                    ) AS path,
+#                    drawers.id AS id,
+#                    drawers.label AS label,
+#                    IFNULL(
+#                        (
+#                            SELECT SUM(collections.content_count)
+#                            FROM collections
+#                            WHERE collections.drawer_id = drawers.id
+#                        ),
+#                        0
+#                    ) AS content_count,
+#                    (
+#                        SELECT COUNT(1)
+#                        FROM collections
+#                        WHERE collections.drawer_id = drawers.id
+#                    ) AS collections_count
+#                FROM
+#                    drawers
+#                JOIN
+#                    locations ON drawers.location_id = locations.id
+#                JOIN
+#                    layout_items ON locations.layout_item_id = layout_items.id
+#                WHERE
+#                    drawers.location_id IS NOT NULL
+#            ''')
+#        ),
     }
 
     return render_template('cabinets.html', **context)
@@ -151,7 +138,3 @@ def drawer(drawer_id):
 
     return render_template('drawer.html', **context)
 
-
-@blueprint.app_template_filter('fromjson')
-def fromjson_filter(s):
-    return json.loads(s)
