@@ -62,6 +62,9 @@ class Cabinet(db.Model):
     layout = relationship('Layout', back_populates='cabinets')
     locations = relationship('Location', back_populates='cabinet')
 
+    drawers = relationship('Drawer',
+        secondary='join(Location, Drawer)', back_populates='cabinet')
+
     def add_locations(self, session):
         for item in LayoutItem.query.filter_by(layout=self.layout):
             session.add(Location(cabinet=self, layout_item=item))
@@ -109,6 +112,10 @@ class Drawer(db.Model):
 
     location = relationship('Location', back_populates='drawer')
     collections = relationship('Collection', back_populates='drawer')
+
+    cabinet = relationship('Cabinet',
+        secondary='join(Location, Cabinet)', uselist=False,
+        back_populates='drawers')
 
     @classmethod
     def create_for_cabinet_locations(cls, session, cabinet):
