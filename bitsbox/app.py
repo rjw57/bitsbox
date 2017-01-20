@@ -6,6 +6,7 @@ from .graphql import (
     graphql_blueprint as graphql,
     graphiql_blueprint as graphiql
 )
+from .frontend import blueprint as frontend
 from .model import db
 from .cli import cli
 
@@ -21,6 +22,7 @@ def create_app(config_filename=None):
     db.init_app(app)
 
     app.register_blueprint(ui)
+    app.register_blueprint(frontend, url_prefix='/fe')
     app.register_blueprint(graphql, url_prefix='/graphql')
     app.cli.add_command(cli)
 

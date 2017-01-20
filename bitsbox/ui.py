@@ -5,6 +5,7 @@ from flask import (
 from sqlalchemy.orm import joinedload
 
 from .model import db, Collection, Cabinet
+from .graphql import schema
 
 blueprint = Blueprint('ui', __name__)
 

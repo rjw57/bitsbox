@@ -9,3 +9,4 @@ dist
 
 *.sqlite
 .eggs
+bitsbox/frontend/static

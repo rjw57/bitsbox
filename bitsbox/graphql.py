@@ -51,6 +51,7 @@ class Collection(SQLAlchemyObjectType):
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
     all_cabinets = SQLAlchemyConnectionField(Cabinet)
+    all_collections = SQLAlchemyConnectionField(Collection)
     cabinets_by_name = SQLAlchemyConnectionField(
         Cabinet, name=graphene.String())
 
