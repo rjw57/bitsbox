@@ -16,6 +16,9 @@
     >
   </head>
   <body>
+    <script>
+      GRAPHQL_ENDPOINT='{{ url_for("graphql.graphql") }}';
+    </script>
     <div id="app">Loading&hellip;</div>
     <script src="{{url_for('frontend.static', filename='bundle.js')}}"></script>
   </body>
