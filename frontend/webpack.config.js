@@ -3,7 +3,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 
 module.exports = {
-  entry: './src/entry.jsx',
+  entry: path.resolve(__dirname, './src/entry.jsx'),
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, '../bitsbox/frontend') + '/static'
@@ -19,6 +19,10 @@ module.exports = {
           presets: ['es2015', 'react'],
           plugins: ['react-relay']
         }
+      },
+      {
+        test: /\.less$/,
+        loader: 'style-loader!css-loader!less-loader'
       }
     ]
   },
