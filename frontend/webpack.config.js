@@ -17,7 +17,7 @@ module.exports = {
         loader: 'babel-loader',
         query: {
           presets: ['es2015', 'react'],
-          // plugins: ['react-relay']
+          plugins: ['react-relay']
         }
       }
     ]

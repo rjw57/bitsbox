@@ -1,0 +1,180 @@
+type Cabinet implements Node {
+  # The ID of the object.
+  id: ID!
+  name: String
+  layoutId: Int
+  layout: Layout
+  locations(before: String, after: String, first: Int, last: Int): LocationConnection
+  drawers(before: String, after: String, first: Int, last: Int): DrawerConnection
+}
+
+type CabinetConnection {
+  pageInfo: PageInfo!
+  edges: [CabinetEdge]!
+}
+
+type CabinetEdge {
+  # The item at the end of the edge
+  node: Cabinet
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type Collection implements Node {
+  # The ID of the object.
+  id: ID!
+  name: String
+  description: String
+  contentCount: Int
+  drawerId: Int
+  drawer: Drawer
+}
+
+type CollectionConnection {
+  pageInfo: PageInfo!
+  edges: [CollectionEdge]!
+}
+
+type CollectionEdge {
+  # The item at the end of the edge
+  node: Collection
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input CreateCabinetInput {
+  name: String!
+  layoutId: ID!
+  clientMutationId: String
+}
+
+type CreateCabinetPayload {
+  cabinet: Cabinet
+  clientMutationId: String
+}
+
+type Drawer implements Node {
+  # The ID of the object.
+  id: ID!
+  label: String
+  locationId: Int
+  location: Location
+  collections(before: String, after: String, first: Int, last: Int): CollectionConnection
+  cabinet: Cabinet
+}
+
+type DrawerConnection {
+  pageInfo: PageInfo!
+  edges: [DrawerEdge]!
+}
+
+type DrawerEdge {
+  # The item at the end of the edge
+  node: Drawer
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+# JSON String
+scalar JSONString
+
+type Layout implements Node {
+  # The ID of the object.
+  id: ID!
+  name: String
+  spec: JSONString
+  cabinets(before: String, after: String, first: Int, last: Int): CabinetConnection
+  items(before: String, after: String, first: Int, last: Int): LayoutItemConnection
+}
+
+type LayoutConnection {
+  pageInfo: PageInfo!
+  edges: [LayoutEdge]!
+}
+
+type LayoutEdge {
+  # The item at the end of the edge
+  node: Layout
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type LayoutItem implements Node {
+  # The ID of the object.
+  id: ID!
+  specItemPath: JSONString
+  layoutId: Int
+  layout: Layout
+}
+
+type LayoutItemConnection {
+  pageInfo: PageInfo!
+  edges: [LayoutItemEdge]!
+}
+
+type LayoutItemEdge {
+  # The item at the end of the edge
+  node: LayoutItem
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type Location implements Node {
+  # The ID of the object.
+  id: ID!
+  cabinetId: Int
+  layoutItemId: Int
+  cabinet: Cabinet
+  layoutItem: LayoutItem
+  drawer: Drawer
+}
+
+type LocationConnection {
+  pageInfo: PageInfo!
+  edges: [LocationEdge]!
+}
+
+type LocationEdge {
+  # The item at the end of the edge
+  node: Location
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type Mutation {
+  createCabinet(input: CreateCabinetInput!): CreateCabinetPayload
+}
+
+# An object with an ID
+interface Node {
+  # The ID of the object.
+  id: ID!
+}
+
+type PageInfo {
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+
+  # When paginating backwards, the cursor to continue.
+  startCursor: String
+
+  # When paginating forwards, the cursor to continue.
+  endCursor: String
+}
+
+type Query {
+  # The ID of the object
+  node(id: ID!): Node
+  layouts(before: String, after: String, first: Int, last: Int): LayoutConnection
+  cabinets(before: String, after: String, first: Int, last: Int): CabinetConnection
+  collections(before: String, after: String, first: Int, last: Int): CollectionConnection
+}
