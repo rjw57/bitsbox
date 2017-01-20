@@ -3,7 +3,9 @@ from flask_graphql import GraphQLView
 import graphene
 from graphene import relay
 
-from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
+from graphene_sqlalchemy import (
+    SQLAlchemyObjectType, SQLAlchemyConnectionField, get_session
+)
 from graphene_sqlalchemy.converter import (
     convert_sqlalchemy_type, convert_json_to_string
 )
@@ -50,17 +52,47 @@ class Collection(SQLAlchemyObjectType):
 
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
-    all_cabinets = SQLAlchemyConnectionField(Cabinet)
-    all_collections = SQLAlchemyConnectionField(Collection)
-    cabinets_by_name = SQLAlchemyConnectionField(
-        Cabinet, name=graphene.String())
+    layouts = SQLAlchemyConnectionField(Layout)
+    cabinets = SQLAlchemyConnectionField(Cabinet)
+    collections = SQLAlchemyConnectionField(Collection)
 
-    def resolve_cabinets_by_name(self, args, context, info):
-        return CabinetModel.query.filter(CabinetModel.name==args['name'])
+#    cabinets_by_name = SQLAlchemyConnectionField(
+#        Cabinet, name=graphene.String())
+#
+#    def resolve_cabinets_by_name(self, args, context, info):
+#        return CabinetModel.query.filter(CabinetModel.name==args['name'])
+
+class CreateCabinet(relay.ClientIDMutation):
+    class Input:
+        name = graphene.String(required=True)
+        layout_id = relay.GlobalID(required=True)
+
+    cabinet = graphene.Field(Cabinet)
+
+    @classmethod
+    def mutate_and_get_payload(cls, input, context, info):
+        name = input.get('name', '')
+        if name == '':
+            raise ValueError('name must not be blank')
+
+        node = relay.Node.get_node_from_global_id(
+            input.get('layout_id'), context, info)
+        if not isinstance(node, LayoutModel):
+            raise ValueError('layout must be specified')
+
+        cabinet = CabinetModel.create_from_layout(
+                db.session, layout=node, name=name)
+        db.session.commit()
+
+        print(cabinet.id, cabinet.name)
+
+        return CreateCabinet(cabinet=cabinet)
+
+class Mutation(graphene.ObjectType):
+    create_cabinet = CreateCabinet.Field()
 
 schema = graphene.Schema(
-    query=Query,
-    types=[Query, Cabinet, Layout, Location, LayoutItem, Drawer, Collection]
+    query=Query, mutation=Mutation,
 )
 
 graphql_blueprint = Blueprint('graphql', __name__)

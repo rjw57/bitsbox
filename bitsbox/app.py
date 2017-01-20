@@ -29,6 +29,6 @@ def create_app(config_filename=None):
     # Things which should only be present in DEBUG-enabled apps
     if app.debug:
         app.register_blueprint(graphiql, url_prefix='/graphiql')
-        toolbar.init_app(app)
+        # toolbar.init_app(app)
 
     return app
