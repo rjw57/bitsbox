@@ -68,10 +68,9 @@ graphql_blueprint.add_url_rule(
     '/', 'graphql', view_func=GraphQLView.as_view('graphql', schema=schema))
 
 graphiql_blueprint = Blueprint(
-    'graphiql', __name__, static_folder='static/graphiql',
-    static_url_path='/static',
-    template_folder='templates/graphiql')
+    'graphiql', __name__, static_folder='graphiql/static',
+    template_folder='graphiql/templates')
 
 @graphiql_blueprint.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('graphiql.html')
