@@ -3,6 +3,8 @@ import ReactList from 'react-list';
 import Relay from 'react-relay';
 
 import {GridList, GridTile} from 'material-ui/GridList';
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+import ContentAdd from 'material-ui/svg-icons/content/add';
 
 let Collection = Relay.createContainer(
   (props) => {
@@ -30,7 +32,12 @@ let CollectionList = Relay.createContainer(
       <GridTile key={collection.node.id} title={collection.node.name} />
     ));
     console.log(listItems);
-    return <GridList>{listItems}</GridList>
+    return <div>
+      <GridList>{listItems}</GridList>
+      <FloatingActionButton secondary={true}>
+        <ContentAdd />
+      </FloatingActionButton>
+    </div>
   }, {
     fragments: {
       collections: () => Relay.QL`
