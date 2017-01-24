@@ -69,12 +69,13 @@
     </form>
   </div>
   <div role="tabpanel" class="tab-pane" id="bulk">
-    <form class="form-horizontal">
+    <form class="form-horizontal" method="POST" enctype="multipart/form-data"
+        action="{{url_for('ui.import_collections')}}">
       <div class="form-group">
         <label for="input-file" class="col-sm-2 control-label">CSV file</label>
         <div class="col-sm-10">
           <input type="file" autofocus class="form-control" id="input-file"
-            required>
+            name="csv" required>
           <p class="help-block">
             The CSV file should have columns with the following headings:
             "name", "description", "count", "cabinet", "drawer". The headings

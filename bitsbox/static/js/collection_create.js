@@ -21,4 +21,11 @@ $(document).ready(function() {
 
   cabinetSelect.change(cabinetChange);
   cabinetChange();
+
+  // if there's a current drawer, update the selection
+  if(window.CURRENT_DRAWER) {
+    drawerSelect.find('option').filter(function(idx, element) {
+      return $(element).val() === String(window.CURRENT_DRAWER);
+    }).attr('selected', 1);
+  }
 });

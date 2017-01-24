@@ -70,14 +70,14 @@ class Cabinet(db.Model):
             session.add(Location(cabinet=self, layout_item=item))
 
     @classmethod
-    def create_from_layout(cls, session, layout, name=None):
+    def create_from_layout(cls, session, layout, name=None, drawer_prefix=None):
         """Convenience function to create a cabinet, create locations from the
         layout and to put a drawer in each location.
 
         """
         c = Cabinet(name=name, layout=layout)
         c.add_locations(session)
-        Drawer.create_for_cabinet_locations(session, c)
+        Drawer.create_for_cabinet_locations(session, c, prefix=drawer_prefix)
         session.add(c)
         return c
 
@@ -118,11 +118,12 @@ class Drawer(db.Model):
         back_populates='drawers')
 
     @classmethod
-    def create_for_cabinet_locations(cls, session, cabinet):
+    def create_for_cabinet_locations(cls, session, cabinet, prefix=None):
         locations = Location.query.filter_by(cabinet=cabinet).\
             join(Location.layout_item).order_by(LayoutItem.spec_item_path)
         for idx, l in enumerate(locations):
-            session.add(Drawer(label=str(idx), location=l))
+            session.add(Drawer(
+                label='{}{}'.format(prefix or '', idx + 1), location=l))
 
 class Collection(db.Model):
     __tablename__ = 'collections'

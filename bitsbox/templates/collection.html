@@ -1,0 +1,77 @@
+{% extends '_layout/base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>
+    {{collection.name}}
+    <small>{{collection.description}}</small>
+  </h1>
+</div>
+
+<form class="form-horizontal">
+  <div class="form-group">
+    <label for="input-name" class="col-sm-2 control-label">Name</label>
+    <div class="col-sm-10">
+      <input type="text" autofocus class="form-control" id="input-name"
+        name="name" placeholder="12FR34" required
+        value="{{collection.name}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-description" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="input-description"
+        name="description" placeholder="Quad frobnicator"
+        value="{{collection.description}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-count" class="col-sm-2 control-label">Count</label>
+    <div class="col-sm-10">
+      <input type="number" min="0" required value="1" class="form-control"
+        id="input-count" name="count"
+        value="{{collection.content_count}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-cabinet" class="col-sm-2 control-label">Cabinet</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="cabinet-select">
+        <option value="none"
+          {% if not collection.drawer %}selected{% endif %}</option>
+        {% for cab in cabinets %}
+        <option value="cab_{{cab.id}}"
+            {% if collection.drawer.cabinet.id == cab.id %}selected{% endif %}>
+          {{cab.name}}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-drawer" class="col-sm-2 control-label">Drawer</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="drawer-select" disabled></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-pencil"></span>
+        Update collection
+      </button>
+    </div>
+  </div>
+</form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+var DRAWER_DATA = {{ drawers | tojson }};
+var CURRENT_DRAWER = {{ collection.drawer.id }};
+</script>
+<script src="{{url_for('static', filename='js/collection_create.js')}}"></script>
+{% endblock %}
