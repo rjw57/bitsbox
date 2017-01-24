@@ -13,6 +13,8 @@ install_requires = """
 
     python-dateutil
     pyyaml
+
+    future
 """.split()
 
 tests_require = """

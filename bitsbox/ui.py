@@ -1,10 +1,14 @@
+import csv
+from io import StringIO
 import json
+
 from flask import (
-    Blueprint, render_template, abort, request, redirect, url_for, flash
+    Blueprint, render_template, abort, request, redirect, url_for, flash,
+    Response
 )
 from sqlalchemy.orm import joinedload
 
-from .model import db, Collection, Cabinet
+from .model import db, Collection, Cabinet, Drawer
 from .graphql import schema
 
 blueprint = Blueprint('ui', __name__)
@@ -13,17 +17,62 @@ blueprint = Blueprint('ui', __name__)
 def index():
     return redirect(url_for('ui.collections'))
 
+@blueprint.route('/export')
+def export():
+    return render_template('export.html')
+
+@blueprint.route('/export/collections.csv')
+def export_collections():
+    out = StringIO()
+    w = csv.writer(out)
+
+    w.writerow(['name', 'description', 'count', 'cabinet', 'drawer'])
+    q = Collection.query.\
+        options(
+            joinedload(Collection.drawer).
+            joinedload(Drawer.cabinet)
+        ).\
+        order_by(Collection.name)
+    w.writerows([
+        [
+            collection.name, collection.description,
+            collection.content_count,
+            collection.drawer.cabinet.name if collection.drawer is not None else '',
+            collection.drawer.label if collection.drawer is not None else ''
+        ]
+        for collection in q
+    ])
+
+    return Response(out.getvalue(), mimetype='text/csv')
+
 @blueprint.route('/collections')
 def collections():
     context = {
-        'collections': Collection.query.order_by(Collection.name),
+        'collections': Collection.query.\
+            options(
+                joinedload(Collection.drawer).
+                joinedload(Drawer.cabinet)
+            ).\
+            order_by(Collection.name),
     }
     return render_template('collections.html', **context)
 
 @blueprint.route('/collections/new', methods=['GET', 'POST'])
 def collection_create():
     if request.method == 'GET':
-        return render_template('collection_create.html')
+        cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).all()
+        context = {
+            'cabinets': cabinets,
+            'drawers': {
+                'byCabinetId': dict(
+                    (str(c.id), [
+                        {'id':str(d.id), 'label':d.label} for d in c.drawers
+                    ])
+                    for c in cabinets
+                ),
+            },
+        }
+        return render_template('collection_create.html', **context)
 
     # This is the POST request, extract the form values
     name = request.values.get('name', '')
