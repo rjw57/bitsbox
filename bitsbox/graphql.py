@@ -3,6 +3,8 @@ from flask_graphql import GraphQLView
 import graphene
 from graphene import relay
 
+from sqlalchemy.orm import joinedload
+
 from graphene_sqlalchemy import (
     SQLAlchemyObjectType, SQLAlchemyConnectionField, get_session
 )
@@ -49,6 +51,11 @@ class Collection(SQLAlchemyObjectType):
     class Meta:
         model = CollectionModel
         interfaces = (relay.Node, )
+
+#    @classmethod
+#    def get_query(cls, context):
+#        return CollectionModel.query.options(
+#            joinedload(CollectionModel.drawer))
 
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
