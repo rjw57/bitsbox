@@ -9,12 +9,13 @@
         <a class="btn btn-default" style="width: 100%"
             href="{{url_for('ui.collection_create')}}">
           <span class="glyphicon glyphicon-plus"></span>
-          <span class="hidden-xs">Add new collection</span>
+          <span class="hidden-xs">Add collections</span>
         </a>
       </div>
       <div class="col-xs-9 col-sm-8 col-md-9">
         <div class="input-group">
-          <input type="text" class="form-control" autofocus placeholder="Search" />
+          <input type="text" class="form-control" autofocus placeholder="Search"
+            data-role="search" data-target="#search-list" />
           <span class="input-group-addon" id="basic-addon2">
             <span class="glyphicon glyphicon-search">
               <span class="sr-only">Search</span>
@@ -31,26 +32,31 @@
   </div>
   {% endif %}
 
-  <div class="list-group">
+  <div class="list-group" id="search-list">
     {% for c in collections %}
-    <a class="list-group-item" href="{{url_for('ui.collection', id=c.id)}}">
+    {% with %}
+      {% set cabinet_name = c.drawer.cabinet.name if c.drawer else None %}
+      {% set drawer_label = c.drawer.label if c.drawer else None %}
+      <a class="list-group-item" href="{{url_for('ui.collection', id=c.id)}}"
+        data-search-text="{{c.name}} {{c.description}} {{cabinet_name}} {{drawer_label}}">
         <span class="badge">{{ c.content_count }}</span>
         <h4 class="list-group-item-heading">
           {{c.name}}
-          {% if c.drawer %}
-          <small>
-            {{c.drawer.cabinet.name}},
-            {{c.drawer.label}}
-          </small>
+          {% if drawer_label %}
+            <small>{{cabinet_name}}, {{drawer_label}}</small>
           {% endif %}
         </h4>
         <p class="list-group-item-text">
           {{c.description}}
         </p>
       </a>
-    </a>
+    {% endwith %}
     {% endfor %}
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{url_for('static', filename='js/search.js')}}"></script>
 {% endblock %}

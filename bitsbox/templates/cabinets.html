@@ -25,7 +25,7 @@
 
   <div class="list-group">
     {% for c in cabinets %}
-      <a class="list-group-item" href="#">
+      <a class="list-group-item" href="{{url_for('ui.cabinet', id=c.id)}}">
         {{ c.name }} ({{c.layout.name}})
       </a>
     </a>

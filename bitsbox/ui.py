@@ -55,34 +55,50 @@ def import_collections():
     header = [h.lower() for h in next(csv.reader(fobj))]
     reader = csv.DictReader(fobj, fieldnames=header)
 
-    n_added, n_skipped = 0, 0
+    n_added, n_updated = 0, 0
     for row in reader:
-        if row.get('name', '') == '':
+        name, drawer_label, cabinet, description = [
+            row.get(k) for k in 'name drawer cabinet description'.split()]
+
+        count = int(row.get('count', 1))
+
+        if name is None or name == '':
             continue
 
-        if Collection.query.filter(Collection.name==row.get('name')).count() > 0:
-            n_skipped += 1
-            continue
+        # Try to get a drawer for this collection
+        drawer = None
+        if drawer_label is not None and cabinet is not None:
+            drawer = Drawer.query.filter(
+                Cabinet.name==cabinet,
+                Drawer.label==drawer_label).first()
 
-        drawer = Drawer.query.filter(
-            Cabinet.name==row.get('cabinet'),
-            Drawer.label==row.get('drawer')).first()
-        if drawer is None:
-            continue
+        # See if there's an existing collection with this name
+        collection = Collection.query.filter(
+            Collection.name==row.get('name')).first()
 
-        db.session.add(Collection(name=row.get('name'),
-            description=row.get('description'),
-            content_count=int(row.get('count', 1)),
-            drawer=drawer))
-        n_added += 1
+        # If no collection, create one
+        if collection is None:
+            db.session.add(Collection(name=row.get('name'),
+                description=description,
+                content_count=count,
+                drawer=drawer))
+            n_added += 1
+        else:
+            # Otherwise, update
+            Collection.query.filter(Collection.id==collection.id).update({
+                Collection.description: description,
+                Collection.content_count: count,
+                Collection.drawer_id: drawer.id if drawer is not None else None
+            })
+            n_updated += 1
 
     db.session.commit()
 
-    m = 'Imported {} {}.'.format(
+    m = 'Imported {} new {}'.format(
         n_added, 'collection' if n_added == 1 else 'collections')
-    if n_skipped > 0:
-        m += ' Skipped {} {}.'.format(
-            n_skipped, 'duplicate' if n_skipped == 1 else 'duplicates')
+    if n_updated > 0:
+        m += ' and updated {}'.format(n_updated)
+    m += '.'
 
     flash(m)
 
@@ -108,7 +124,33 @@ def collection(id):
     if collection is None:
         abort(404)
 
-    cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).all()
+    cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
+        order_by(Cabinet.name).all()
+    context = {
+        'cabinets': cabinets,
+        'drawers': {
+            'byCabinetId': dict(
+                (str(c.id), [
+                    {'id':str(d.id), 'label':d.label} for d in c.drawers
+                ])
+                for c in cabinets
+            ),
+        },
+        'collection': collection,
+    }
+
+    return render_template('collection.html', **context)
+
+@blueprint.route('/collections/<int:id>/update', methods=['POST'])
+def collection_update(id):
+    collection = Collection.query.options(
+        joinedload(Collection.drawer).joinedload(Drawer.cabinet)
+    ).get(id)
+    if collection is None:
+        abort(404)
+
+    cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
+        order_by(Cabinet.name).all()
     context = {
         'cabinets': cabinets,
         'drawers': {
@@ -127,7 +169,8 @@ def collection(id):
 @blueprint.route('/collections/new', methods=['GET', 'POST'])
 def collection_create():
     if request.method == 'GET':
-        cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).all()
+        cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
+            order_by(Cabinet.name).all()
         context = {
             'cabinets': cabinets,
             'drawers': {
@@ -168,11 +211,37 @@ def cabinets():
         'cabinets': Cabinet.query.options(
             joinedload(Cabinet.drawers),
             joinedload(Cabinet.layout),
-        ).all(),
+        ).order_by(Cabinet.name).all(),
         'layouts': Layout.query.all(),
     }
 
     return render_template('cabinets.html', **context)
+
+@blueprint.route('/cabinet/<int:id>')
+def cabinet(id):
+    cabinet = Cabinet.query.get(id)
+    if cabinet is None:
+        abort(404)
+
+    context = {
+        'cabinet': cabinet,
+        'layouts': Layout.query.all(),
+    }
+
+    return render_template('cabinet.html', **context)
+
+@blueprint.route('/cabinet/<int:id>/delete')
+def cabinet_delete(id):
+    cabinet = Cabinet.query.get(id)
+    if cabinet is None:
+        abort(404)
+
+    Cabinet.query.filter(Cabinet.id == id).delete()
+    db.session.commit()
+
+    flash('Cabinet "{}" deleted'.format(cabinet.name))
+
+    return redirect(url_for('ui.cabinets'))
 
 @blueprint.route('/cabinets/new', methods=['GET', 'POST'])
 def cabinet_create():

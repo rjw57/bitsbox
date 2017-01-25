@@ -42,7 +42,7 @@
           {% if not collection.drawer %}selected{% endif %}>None</option>
         {% for cab in cabinets %}
         <option value="cab_{{cab.id}}"
-            {% if collection.drawer.cabinet.id == cab.id %}selected{% endif %}>
+            {% if collection.drawer and collection.drawer.cabinet.id == cab.id %}selected{% endif %}>
           {{cab.name}}
         </option>
         {% endfor %}
@@ -58,8 +58,8 @@
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
       <button type="submit" class="btn btn-default">
-        <span class="glyphicon glyphicon-pencil"></span>
-        Update collection
+        <span class="glyphicon glyphicon-edit"></span>
+        Update
       </button>
     </div>
   </div>
@@ -71,7 +71,7 @@
 {% block scripts %}
 <script>
 var DRAWER_DATA = {{ drawers | tojson }};
-var CURRENT_DRAWER = {{ collection.drawer.id }};
+var CURRENT_DRAWER = {{ collection.drawer.id | default('null') }};
 </script>
 <script src="{{url_for('static', filename='js/collection_create.js')}}"></script>
 {% endblock %}
