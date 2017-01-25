@@ -1,103 +1,54 @@
 {% extends "_layout/base.html" %}
 
 {% block content %}
-
-<ul class="nav nav-tabs" role="tablist">
-  <li role="presentation" class="active">
-    <a href="#single" aria-controls="single" role="tab" data-toggle="tab">
-      Single
-    </a>
-  </li>
-  <li role="presentation">
-    <a href="#bulk" aria-controls="bulk" role="tab" data-toggle="tab">
-      Bulk import
-    </a>
-  </li>
-</ul>
-
-<div class="divider-5"></div>
-
-<div class="tab-content">
-  <div role="tabpanel" class="tab-pane active" id="single">
     <form class="form-horizontal">
-      <div class="form-group">
-        <label for="input-name" class="col-sm-2 control-label">Name</label>
-        <div class="col-sm-10">
-          <input type="text" autofocus class="form-control" id="input-name"
-            name="name" placeholder="12FR34" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="input-description" class="col-sm-2 control-label">Description</label>
-        <div class="col-sm-10">
-          <input type="text" class="form-control" id="input-description"
-            name="description" placeholder="Quad frobnicator">
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="input-count" class="col-sm-2 control-label">Count</label>
-        <div class="col-sm-10">
-          <input type="number" min="0" required value="1" class="form-control"
-            id="input-count" name="count">
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="input-cabinet" class="col-sm-2 control-label">Cabinet</label>
-        <div class="col-sm-10">
-          <select class="form-control" id="cabinet-select">
-            <option value="none">None</option>
-            {% for cab in cabinets %}
-            <option value="cab_{{cab.id}}">{{cab.name}}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="input-drawer" class="col-sm-2 control-label">Drawer</label>
-        <div class="col-sm-10">
-          <select class="form-control" id="drawer-select" disabled></select>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default">
-            <span class="glyphicon glyphicon-plus"></span>
-            Create new collection
-          </button>
-        </div>
-      </div>
-    </form>
+  <div class="form-group">
+    <label for="input-name" class="col-sm-2 control-label">Name</label>
+    <div class="col-sm-10">
+      <input type="text" autofocus class="form-control" id="input-name"
+        name="name" placeholder="12FR34" required>
+    </div>
   </div>
-  <div role="tabpanel" class="tab-pane" id="bulk">
-    <form class="form-horizontal" method="POST" enctype="multipart/form-data"
-        action="{{url_for('ui.import_collections')}}">
-      <div class="form-group">
-        <label for="input-file" class="col-sm-2 control-label">CSV file</label>
-        <div class="col-sm-10">
-          <input type="file" autofocus class="form-control" id="input-file"
-            name="csv" required>
-          <p class="help-block">
-            The CSV file should have columns with the following headings:
-            "name", "description", "count", "cabinet", "drawer". The headings
-            are case insensitive. Additional columns are ignored. The "cabinet"
-            and "drawer" columns specify the cabinet name and drawer label
-            respectively. This is the same format as the
-            <a href="{{url_for('ui.export_collections')}}">collections
-            export</a> format.
-          </p>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default">
-            <span class="glyphicon glyphicon-upload"></span>
-            Upload
-          </button>
-        </div>
-      </div>
-    </form>
+  <div class="form-group">
+    <label for="input-description" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="input-description"
+        name="description" placeholder="Quad frobnicator">
+    </div>
   </div>
-</div>
+  <div class="form-group">
+    <label for="input-count" class="col-sm-2 control-label">Count</label>
+    <div class="col-sm-10">
+      <input type="number" min="0" required value="1" class="form-control"
+        id="input-count" name="count">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-cabinet" class="col-sm-2 control-label">Cabinet</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="cabinet-select">
+        <option value="none">None</option>
+        {% for cab in cabinets %}
+        <option value="cab_{{cab.id}}">{{cab.name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-drawer" class="col-sm-2 control-label">Drawer</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="drawer-select" disabled></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-plus"></span>
+        Create new collection
+      </button>
+    </div>
+  </div>
+</form>
 
 {% endblock %}
 
