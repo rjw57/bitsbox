@@ -127,7 +127,58 @@ def import_collections():
 
     flash(m)
 
-    return redirect(url_for('ui.collections'))
+    return redirect(url_for('ui.import'))
+
+@blueprint.route('/import/links', methods=['POST'])
+def import_links():
+    fobj = request.files.get('csv')
+    if fobj is None:
+        abort(400)
+    fobj = TextIOWrapper(fobj)
+
+    header = [h.lower() for h in next(csv.reader(fobj))]
+    reader = csv.DictReader(fobj, fieldnames=header)
+
+    n_added, n_updated = 0, 0
+    for row in reader:
+        collection_name, name, url = [
+            row.get(k) for k in 'collection name url'.split()]
+
+        # Try to get a collection for this link
+        collection = Collection.query.filter(
+            Collection.name==collection_name).first()
+
+        # Skip unknown collections
+        if collection is None:
+            continue
+
+        # Is there a resource link already?
+        link = ResourceLink.query.filter(
+            ResourceLink.collection==collection,
+            ResourceLink.name==name).first()
+
+        if link is not None:
+            # Yes, update URL if necessary
+            link.url = url
+            n_updated += 1
+        else:
+            # No existing link, create one
+            link = ResourceLink(
+                name=name, url=url, collection=collection)
+            db.session.add(link)
+            n_added += 1
+
+    db.session.commit()
+
+    m = 'Imported {} new {}'.format(
+        n_added, 'link' if n_added == 1 else 'links')
+    if n_updated > 0:
+        m += ' and updated {}'.format(n_updated)
+    m += '.'
+
+    flash(m)
+
+    return redirect(url_for('ui.import'))
 
 @blueprint.route('/collections')
 def collections():
