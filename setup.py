@@ -10,9 +10,13 @@ install_requires = """
     graphene>=1.0
     graphene_sqlalchemy
     sqlalchemy
+    sqlalchemy-utils
 
+    furl
     python-dateutil
     pyyaml
+
+    future
 """.split()
 
 tests_require = """

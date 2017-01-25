@@ -1,55 +1,39 @@
 {% extends "_layout/base.html" %}
 
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/cabinet.css') }}">
-{% endblock %}
-
 {% block content %}
 
-{% macro render_layout(path, layout) %}
-{% if layout.type == 'container' %}
-  <div class="bb-container {{ layout.class }}" style="{{ layout.style }}">
-    {% for item in layout.children %}
-      {{ render_layout(path + [loop.index0], item) }}
-    {% endfor %}
-  </div>
-{% elif layout.type == 'item' %}
-  <div class="bb-container-drawer mdl-shadow--2dp {{ layout.class }}"
-       style="{{ layout.style }}">
-    <a href="#"
-        class="waves-effect" style="width: 100%; height: 100%">
-      <div class="label">TODO</div>
-      <div class="count">TODO</div>
-    </a>
-{#
-    {% with drawer = drawers_by_path[path | join('.')] %}
-    {% if drawer %}
-    <a href="{{ url_for('ui.drawer', drawer_id=drawer.id) }}"
-        class="waves-effect" style="width: 100%; height: 100%">
-      <div class="label">{{ drawer.label }}</div>
-      <div class="count">
-        {{ drawer.content_count }},
-        {{ drawer.collections_count }}
-      </div>
-    </a>
-    {% endif %}
-    {% endwith %}
-#}
-  </div>
-{% endif %}
-{% endmacro %}
+<div class="page-header"><h1>Cabinets</h1></div>
 
-{% for cabinet in cabinets %}
-<div>
-  <h4>{{ cabinet.name }}</h4>
-{% with layout = cabinet.layout %}
-  <div class="bb-container-toplevel">
-    <div class="z-depth-2 grey lighten-1">
-      {{ render_layout([cabinet.id], layout.spec) }}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-xs-3 col-sm-4 col-md-3">
+        <a class="btn btn-default" style="width: 100%"
+            href="{{url_for('ui.cabinet_create')}}">
+          <span class="glyphicon glyphicon-plus"></span>
+          <span class="hidden-xs">Add new cabinet</span>
+        </a>
+      </div>
+      <div class="col-xs-9 col-sm-8 col-md-9">
+      </div>
     </div>
   </div>
-{% endwith %}
+
+  {% if not cabinets %}
+  <div class="panel-body">
+    <div class="text-center">There are no cabinets.</div>
+  </div>
+  {% endif %}
+
+  <div class="list-group">
+    {% for c in cabinets %}
+      <a class="list-group-item" href="{{url_for('ui.cabinet', id=c.id)}}">
+        {{ c.name }} ({{c.layout.name}})
+      </a>
+    </a>
+    {% endfor %}
+  </div>
 </div>
-{% endfor %}
 
 {% endblock %}
+

@@ -1,20 +1,25 @@
-.page-content {
-    max-width: 960px;
-    margin: auto auto;
+.divider-10{
+  width:100%;
+  min-height:1px;
+  margin-top:10px;
+  margin-bottom:10px;
+  display:inline-block;
+  position:relative;
 }
 
-.fab {
-    position: fixed;
-    right: 32px;
-    bottom: 32px;
+.divider-5{
+  width:100%;
+  min-height:1px;
+  margin-top:5px;
+  margin-bottom:5px;
+  display:inline-block;
+  position:relative;
 }
 
-.collection-card {
-    display: block;
-    text-decoration: inherit;
-    color: inherit;
-}
-
-.collection-card:hover {
-    background-color: #e0e0e0 !important;
+.flash-messages {
+  position: fixed;
+  right: 0;
+  left: 0;
+  top: 50px;
+  padding: 10px 0;
 }

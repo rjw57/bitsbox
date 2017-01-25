@@ -1,36 +1,60 @@
 {% extends "_layout/base.html" %}
 
 {% block content %}
-
-<form action="{{ url_for('ui.collection_create') }}" method="post">
-  <div class="mdl-grid">
-    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--4-col">
-      <input class="mdl-textfield__input" type="text" id="name" name="name"
-             required>
-      <label class="mdl-textfield__label" for="name">Name</label>
-    </div>
-    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--7-col">
-      <input class="mdl-textfield__input" type="text" id="description"
-             name="description" required>
-      <label class="mdl-textfield__label" for="description">
-        Description
-      </label>
-    </div>
-    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--1-col">
-      <input class="mdl-textfield__input" type="number" id="count"
-             name="count" min="0" required>
-      <label class="mdl-textfield__label" for="count">
-        Count
-      </label>
+    <form class="form-horizontal">
+  <div class="form-group">
+    <label for="input-name" class="col-sm-2 control-label">Name</label>
+    <div class="col-sm-10">
+      <input type="text" autofocus class="form-control" id="input-name"
+        name="name" placeholder="12FR34" required>
     </div>
   </div>
-  <div class="mdl-grid">
-    <div class="mdl-cell mdl-cell--12-col">
-      <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
-        Create collection
+  <div class="form-group">
+    <label for="input-description" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="input-description"
+        name="description" placeholder="Quad frobnicator">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-count" class="col-sm-2 control-label">Count</label>
+    <div class="col-sm-10">
+      <input type="number" min="0" required value="1" class="form-control"
+        id="input-count" name="count">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-cabinet" class="col-sm-2 control-label">Cabinet</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="cabinet-select">
+        <option value="none">None</option>
+        {% for cab in cabinets %}
+        <option value="cab_{{cab.id}}">{{cab.name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input-drawer" class="col-sm-2 control-label">Drawer</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="drawer-select" disabled></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-plus"></span>
+        Create new collection
       </button>
     </div>
   </div>
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+var DRAWER_DATA = {{ drawers | tojson }};
+</script>
+<script src="{{url_for('static', filename='js/collection_create.js')}}"></script>
 {% endblock %}

@@ -1,40 +1,73 @@
-{% extends "_layout/dark.html" %}
+{% extends "_layout/base.html" %}
 
 {% block content %}
 
-{% if collections %}
-  <div class="mdl-grid">
+<div class="page-header"><h1>Collections</h1></div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-xs-3 col-sm-4 col-md-3">
+        <a class="btn btn-default" style="width: 100%"
+            href="{{url_for('ui.collection_create')}}">
+          <span class="glyphicon glyphicon-plus"></span>
+          <span class="hidden-xs">Add collections</span>
+        </a>
+      </div>
+      <div class="col-xs-9 col-sm-8 col-md-9">
+        <div class="input-group">
+          <input type="text" class="form-control" autofocus placeholder="Search"
+            data-role="search" data-target="#search-list" />
+          <span class="input-group-addon" id="basic-addon2">
+            <span class="glyphicon glyphicon-search">
+              <span class="sr-only">Search</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if not collections %}
+  <div class="panel-body">
+    <div class="text-center">There are no collections</div>
+  </div>
+  {% endif %}
+
+  <div class="list-group" id="search-list">
     {% for c in collections %}
-      <a href="#" class="collection-card mdl-cell mdl-cell--3-col
-        mdl-cell--6-col-phone
-        mdl-shadow--2dp
-        mdl-color--primary-contrast">
-        <div class="mdl-card__title">
-          <h2 class="mdl-card__title-text">
-            {{ c.content_count }} &times; {{ c.name }}
-          </h2>
-        </div>
-        <div class="mdl-card__supporting-text">
-          {{ c.description }}
-          {% if c.drawer_label %}
-            <br>
-            {% if c.cabinet_name %}{{ c.cabinet_name }},{% endif %}
-            {{ c.drawer_label }}
+    {% with %}
+      {% set cabinet_name = c.drawer.cabinet.name if c.drawer else None %}
+      {% set drawer_label = c.drawer.label if c.drawer else None %}
+      <a class="list-group-item" href="{{url_for('ui.collection', id=c.id)}}"
+        data-search-text="
+          {{c.name}} {{c.description}} {{cabinet_name}} {{drawer_label}}
+          {{c.resource_links | join(' ', attribute='name')}}
+        ">
+        {% if c.resource_links %}
+          <div class="pull-right">
+            {% for link in c.resource_links | sort(attribute='name') %}
+            <span class="label label-default">{{link.name}}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <h4 class="list-group-item-heading">
+          {{c.content_count}} &times; {{c.name}}
+          {% if drawer_label %}
+            <small>{{cabinet_name}}, {{drawer_label}}</small>
           {% endif %}
-        </div>
-        </span>
-      </span>
-    </a>
+        </h4>
+        <p class="list-group-item-text">
+          {{c.description}}
+        </p>
+      </a>
+    {% endwith %}
     {% endfor %}
   </div>
-{% endif %}
-
-<div class="fab">
-  <a href="{{ url_for('ui.collection_create') }}"
-     class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect
-    mdl-button--colored">
-    <i class="material-icons">add</i>
-  </a>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{url_for('static', filename='js/search.js')}}"></script>
 {% endblock %}

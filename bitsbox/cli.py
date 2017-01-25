@@ -36,21 +36,3 @@ def importlayouts_command(yaml_file):
 
     session.commit()
 
-@cli.command('addcabinet')
-@click.argument('name', type=str)
-@click.argument('layout_id', type=int)
-@with_appcontext
-def addcabinet_command(name, layout_id):
-    """Add a cabinet with the specified layout id and create all drawers."""
-    session = db.session
-
-    if Cabinet.query.filter(Cabinet.name==name).count() > 0:
-        print('Not adding cabinet with non-unique name')
-        return
-
-    layout = Layout.query.get(layout_id)
-    assert layout is not None
-    Cabinet.create_from_layout(session, layout, name)
-    session.commit()
-
-    print('Created cabinet "{}" with layout "{}"'.format(name, layout.name))
