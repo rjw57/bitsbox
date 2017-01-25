@@ -6,7 +6,8 @@
   <h1>Cabinet "{{cabinet.name}}"</h1>
 </div>
 
-<form method="POST" action="#">
+<form method="POST"
+  action="{{url_for('ui.cabinet', id=cabinet.id)}}">
   <div class="panel panel-default">
     <div class="panel-heading"><h3 class="panel-title">Details</h3></div>
     <div class="panel-body">
@@ -64,9 +65,9 @@
           </button>
         </form>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 

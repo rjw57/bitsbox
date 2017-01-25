@@ -192,34 +192,33 @@ def collections():
     }
     return render_template('collections.html', **context)
 
-@blueprint.route('/collections/<int:id>')
+@blueprint.route('/collections/<int:id>', methods=['GET', 'POST'])
 def collection(id):
-    collection = Collection.query.options(
-        joinedload(Collection.drawer).joinedload(Drawer.cabinet),
-        joinedload(Collection.resource_links)
-    ).get(id)
-    if collection is None:
-        abort(404)
+    if request.method == 'GET':
+        collection = Collection.query.options(
+            joinedload(Collection.drawer).joinedload(Drawer.cabinet),
+            joinedload(Collection.resource_links)
+        ).get(id)
+        if collection is None:
+            abort(404)
 
-    cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
-        order_by(Cabinet.name).all()
-    context = {
-        'cabinets': cabinets,
-        'drawers': {
-            'byCabinetId': dict(
-                (str(c.id), [
-                    {'id':str(d.id), 'label':d.label} for d in c.drawers
-                ])
-                for c in cabinets
-            ),
-        },
-        'collection': collection,
-    }
+        cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
+            order_by(Cabinet.name).all()
+        context = {
+            'cabinets': cabinets,
+            'drawers': {
+                'byCabinetId': dict(
+                    (str(c.id), [
+                        {'id':str(d.id), 'label':d.label} for d in c.drawers
+                    ])
+                    for c in cabinets
+                ),
+            },
+            'collection': collection,
+        }
 
-    return render_template('collection.html', **context)
+        return render_template('collection.html', **context)
 
-@blueprint.route('/collections/<int:id>/update', methods=['POST'])
-def collection_update(id):
     collection = Collection.query.get(id)
     if collection is None:
         abort(404)
@@ -251,7 +250,20 @@ def collection_update(id):
 
     return redirect(url_for('ui.collection', id=collection.id))
 
-@blueprint.route('/collections/new')
+@blueprint.route('/collections/<int:id>/delete', methods=['POST'])
+def collection_delete(id):
+    collection = Collection.query.get(id)
+    if collection is None:
+        abort(404)
+
+    Collection.query.filter(Collection.id == id).delete()
+    db.session.commit()
+
+    flash('Collection "{}" deleted'.format(collection.name))
+
+    return redirect(url_for('ui.collections'))
+
+@blueprint.route('/collections/new', methods=['GET', 'POST'])
 def collection_create():
     if request.method == 'GET':
         cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
@@ -302,18 +314,34 @@ def cabinets():
 
     return render_template('cabinets.html', **context)
 
-@blueprint.route('/cabinet/<int:id>')
+@blueprint.route('/cabinet/<int:id>', methods=['GET', 'POST'])
 def cabinet(id):
+    if request.method == 'GET':
+        cabinet = Cabinet.query.get(id)
+        if cabinet is None:
+            abort(404)
+
+        context = {
+            'cabinet': cabinet,
+            'layouts': Layout.query.all(),
+        }
+
+        return render_template('cabinet.html', **context)
+
     cabinet = Cabinet.query.get(id)
     if cabinet is None:
         abort(404)
 
-    context = {
-        'cabinet': cabinet,
-        'layouts': Layout.query.all(),
-    }
+    name = request.values.get('name', '')
+    if name == '':
+        abort(400)
 
-    return render_template('cabinet.html', **context)
+    cabinet.name = name
+    db.session.commit()
+
+    flash('Cabinet "{}" updated.'.format(cabinet.name))
+
+    return redirect(url_for('ui.cabinet', id=cabinet.id))
 
 @blueprint.route('/cabinet/<int:id>/delete', methods=['POST'])
 def cabinet_delete(id):
