@@ -9,6 +9,8 @@ interest to anyone else and of even littler use.
 $ export BITSBOX_CONFIG=config/dev.py
 $ export FLASK_APP=bitsbox.autoapp
 $ export FLASK_DEBUG=1
+$ flask db upgrade
+$ flask bitsbox importlayouts layouts.yaml
 $ flask run
 ```
 
