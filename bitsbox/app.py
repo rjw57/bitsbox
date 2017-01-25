@@ -6,7 +6,7 @@ from .graphql import (
     graphql_blueprint as graphql,
     graphiql_blueprint as graphiql
 )
-from .model import db
+from .model import db, migrate
 from .cli import cli
 
 toolbar = DebugToolbarExtension()
@@ -19,6 +19,7 @@ def create_app(config_filename=None):
         app.config.from_pyfile(config_filename)
 
     db.init_app(app)
+    migrate.init_app(app, db, render_as_batch=True)
 
     app.register_blueprint(ui)
     app.cli.add_command(cli)

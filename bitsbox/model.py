@@ -2,10 +2,12 @@ import collections
 import json
 from sqlite3 import Connection as SQLite3Connection
 
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import event as sqlalchemy_event
+from sqlalchemy import event as sqlalchemy_event, MetaData
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.schema import DEFAULT_NAMING_CONVENTION
 from sqlalchemy_utils.types.url import URLType
 
 # Ensure that sqlite honours foreign key constraints
@@ -17,7 +19,10 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.execute("PRAGMA foreign_keys=ON;")
         cursor.close()
 
-db = SQLAlchemy()
+db = SQLAlchemy(
+    metadata=MetaData(naming_convention=DEFAULT_NAMING_CONVENTION)
+)
+migrate = Migrate()
 
 # The Layout model stores the specification as a JSON-encoded document. This
 # type decorator is lifted from the SQLAlchemy specs but is modified to use a
