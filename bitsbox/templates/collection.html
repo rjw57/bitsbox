@@ -9,64 +9,137 @@
   </h1>
 </div>
 
-<form class="form-horizontal" method="POST"
+<form method="POST"
   action="{{url_for('ui.collection_update', id=collection.id)}}">
-  <div class="form-group">
-    <label for="input-name" class="col-sm-2 control-label">Name</label>
-    <div class="col-sm-10">
-      <input type="text" autofocus class="form-control" id="input-name"
-        name="name" placeholder="12FR34" required
-        value="{{collection.name}}">
+  <div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">Details</h3></div>
+
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="input-name" class="control-label">Name</label>
+            <input type="text" autofocus class="form-control" id="input-name"
+              name="name" placeholder="12FR34" required
+              value="{{collection.name}}">
+          </div>
+        </div>
+        <div class="col-sm-7">
+          <div class="form-group">
+            <label for="input-description" class="control-label">Description</label>
+            <input type="text" class="form-control" id="input-description"
+              name="description" placeholder="Quad frobnicator"
+              value="{{collection.description}}">
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+            <label for="input-count" class="control-label">Count</label>
+            <input type="number" min="0" required class="form-control"
+              id="input-count" name="count"
+              value="{{collection.content_count}}">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="input-cabinet" class="control-label">Cabinet</label>
+            <select class="form-control" id="cabinet-select">
+              <option value="none"
+                {% if not collection.drawer %}selected{% endif %}>None</option>
+              {% for cab in cabinets %}
+              <option value="cab_{{cab.id}}"
+                  {% if collection.drawer and collection.drawer.cabinet.id == cab.id %}selected{% endif %}>
+                {{cab.name}}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="input-drawer" class="control-label">Drawer</label>
+            <select class="form-control" name="drawer"
+              id="drawer-select" disabled></select>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="form-group">
-    <label for="input-description" class="col-sm-2 control-label">Description</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="input-description"
-        name="description" placeholder="Quad frobnicator"
-        value="{{collection.description}}">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="input-count" class="col-sm-2 control-label">Count</label>
-    <div class="col-sm-10">
-      <input type="number" min="0" required class="form-control"
-        id="input-count" name="count"
-        value="{{collection.content_count}}">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="input-cabinet" class="col-sm-2 control-label">Cabinet</label>
-    <div class="col-sm-10">
-      <select class="form-control" id="cabinet-select">
-        <option value="none"
-          {% if not collection.drawer %}selected{% endif %}>None</option>
-        {% for cab in cabinets %}
-        <option value="cab_{{cab.id}}"
-            {% if collection.drawer and collection.drawer.cabinet.id == cab.id %}selected{% endif %}>
-          {{cab.name}}
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="input-drawer" class="col-sm-2 control-label">Drawer</label>
-    <div class="col-sm-10">
-      <select class="form-control" name="drawer"
-        id="drawer-select" disabled></select>
-    </div>
-  </div>
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
+
+    <div class="panel-footer">
       <button type="submit" class="btn btn-default">
         <span class="glyphicon glyphicon-edit"></span>
-        Update
+        Update collection
       </button>
     </div>
   </div>
 </form>
+
+<div class="panel panel-default">
+  <div class="panel-heading"><h3 class="panel-title">Links</h3></div>
+
+  {% if collection.resource_links %}
+    <ul class="list-group">
+      {% for link in collection.resource_links | sort(attribute='name') %}
+        <li class="list-group-item">
+          <div class="row">
+            <div class="col-xs-10 col-sm-11">
+              <a href="{{link.url}}" target="_blank">
+                {{link.name}}
+                <div class="hidden-xs">
+                  <small class="text-muted">{{link.url}}</small>
+                </div>
+              </a>
+            </div>
+            <div class="col-xs-2 col-sm-1 text-right">
+              <form method="POST"
+                action="{{url_for('ui.link_delete', id=link.id)}}">
+                <button type="submit" class="btn btn-link">
+                  <span class="text-danger">
+                    <span class="glyphicon glyphicon-trash"></span>
+                    <span class="sr-only">Delete</span>
+                  </span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="panel-body">
+      <div class="text-center">No links</div>
+    </div>
+  {% endif %}
+
+  <form method="POST" action="{{url_for('ui.link_create')}}">
+    <input type="hidden" name="collection_id" value="{{collection.id}}">
+    <div class="panel-footer">
+      <div class="row">
+        <div class="col-sm-3">
+          <input class="form-control" list="names" type="text"
+            placeholder="Name" required name="name">
+          <datalist id="names">
+            <option value="Datasheet">
+          </datalist>
+        </div>
+        <div class="col-sm-7">
+          <input class="form-control" type="yrl"
+            placeholder="http://example.com/" required name="url">
+        </div>
+        <div class="col-sm-2">
+          <button type="submit" class="btn btn-default form-control">
+            <span class="glyphicon glyphicon-plus"></span>
+            Add link
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
+
+</form>
 
 {% endblock %}
 

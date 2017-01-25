@@ -8,7 +8,7 @@ from flask import (
 )
 from sqlalchemy.orm import joinedload
 
-from .model import db, Collection, Cabinet, Drawer, Layout
+from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink
 from .graphql import schema
 
 blueprint = Blueprint('ui', __name__)
@@ -45,7 +45,32 @@ def export_collections():
 
     return Response(out.getvalue(), mimetype='text/csv')
 
-@blueprint.route('/collections/import', methods=['POST'])
+@blueprint.route('/export/resource_links.csv')
+def export_links():
+    out = StringIO()
+    w = csv.writer(out)
+
+    w.writerow(['collection', 'name', 'url'])
+    q = ResourceLink.query.\
+        options(
+            joinedload(ResourceLink.collection)
+        ).\
+        order_by(ResourceLink.name)
+    w.writerows([
+        [link.collection.name, link.name, link.url]
+        for link in q
+    ])
+
+    return Response(out.getvalue(), mimetype='text/csv')
+
+@blueprint.route('/import', endpoint='import')
+def import_index():
+    context = {
+        'cabinets': Cabinet.query.order_by(Cabinet.name).all(),
+    }
+    return render_template('import.html', **context)
+
+@blueprint.route('/import/collections', methods=['POST'])
 def import_collections():
     fobj = request.files.get('csv')
     if fobj is None:
@@ -109,8 +134,8 @@ def collections():
     context = {
         'collections': Collection.query.\
             options(
-                joinedload(Collection.drawer).
-                joinedload(Drawer.cabinet)
+                joinedload(Collection.resource_links),
+                joinedload(Collection.drawer).joinedload(Drawer.cabinet)
             ).\
             order_by(Collection.name).all(),
     }
@@ -119,7 +144,8 @@ def collections():
 @blueprint.route('/collections/<int:id>')
 def collection(id):
     collection = Collection.query.options(
-        joinedload(Collection.drawer).joinedload(Drawer.cabinet)
+        joinedload(Collection.drawer).joinedload(Drawer.cabinet),
+        joinedload(Collection.resource_links)
     ).get(id)
     if collection is None:
         abort(404)
@@ -238,7 +264,7 @@ def cabinet(id):
 
     return render_template('cabinet.html', **context)
 
-@blueprint.route('/cabinet/<int:id>/delete')
+@blueprint.route('/cabinet/<int:id>/delete', methods=['POST'])
 def cabinet_delete(id):
     cabinet = Cabinet.query.get(id)
     if cabinet is None:
@@ -274,54 +300,35 @@ def cabinet_create():
 
     return redirect(url_for('ui.cabinets'))
 
-@blueprint.route('/drawer/<int:drawer_id>')
-def drawer(drawer_id):
-    db = get_db()
+@blueprint.route('/links/new', methods=['POST'])
+def link_create():
+    collection = Collection.query.filter(
+        Collection.id==int(request.values.get('collection_id'))).first()
+    if collection is None:
+        abort(400)
 
-    context = {
-        'drawer': db.execute('''
-            SELECT
-                drawers.id AS id,
-                drawers.label AS label
-            FROM
-                drawers
-            WHERE
-                drawers.id = ?
-        ''', (drawer_id,)).fetchone(),
-        'location': db.execute('''
-            SELECT
-                cabinets.id AS cabinet_id,
-                locations.id AS location_id,
-                cabinets.name AS cabinet_name,
-                layout_items.spec_item_path AS spec_item_path
-            FROM
-                drawers
-            JOIN
-                locations ON drawers.location_id = locations.id
-            JOIN
-                layout_items ON locations.layout_item_id = layout_items.id
-            JOIN
-                cabinets ON locations.cabinet_id = cabinets.id
-            WHERE
-                drawers.id = ?
-        ''', (drawer_id,)).fetchone(),
-        'collections': db.execute('''
-            SELECT
-                id AS collection_id,
-                name,
-                description,
-                content_count
-            FROM
-                collections
-            WHERE
-                drawer_id = ?
-            ORDER BY
-                name, id
-        ''', (drawer_id,)).fetchall(),
-    }
+    name, url = [request.values.get(k, '') for k in 'name url'.split()]
+    if name == '' or url == '':
+        abort(400)
 
-    if context['drawer'] is None:
+    link = ResourceLink(name=name, url=url, collection=collection)
+    db.session.add(link)
+    db.session.commit()
+
+    flash('Link "{}" added'.format(name))
+
+    return redirect(url_for('ui.collection', id=collection.id))
+
+@blueprint.route('/link/<int:id>/delete', methods=['POST'])
+def link_delete(id):
+    link = ResourceLink.query.options(
+        joinedload(ResourceLink.collection)).filter(ResourceLink.id==id).first()
+    if not link:
         abort(404)
 
-    return render_template('drawer.html', **context)
+    ResourceLink.query.filter(ResourceLink.id==id).delete()
+    db.session.commit()
 
+    flash('Link "{}" deleted.'.format(link.name))
+
+    return redirect(url_for('ui.collection', id=link.collection.id))

@@ -1,0 +1,36 @@
+{% extends "_layout/base.html" %}
+
+{% block content %}
+<div class="page-header"><h1>Bulk import</h1></div>
+
+<form method="POST" enctype="multipart/form-data"
+  action="{{url_for('ui.import_collections')}}">
+  <div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">Collections</h3></div>
+
+    <div class="panel-body">
+      <div class="form-group">
+        <label class="sr-only" for="input-file" class="control-label">CSV file</label>
+        <input type="file" autofocus class="form-control" id="input-file"
+          name="csv" required>
+        <span class="help-block">
+          This should be a CSV file with the following column headings:
+          "name", "description", "count", "cabinet", "drawer". The headings
+          are case insensitive. Additional columns are ignored. The "cabinet"
+          and "drawer" columns specify the cabinet name and drawer label
+          respectively. This is the same format as the
+          <a href="{{url_for('ui.export_collections')}}">collections
+          export</a> format.
+        </span>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <button type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-upload"></span>
+        Upload
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}

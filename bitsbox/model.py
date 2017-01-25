@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event as sqlalchemy_event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils.types.url import URLType
 
 # Ensure that sqlite honours foreign key constraints
 # http://stackoverflow.com/questions/2614984/a
@@ -38,8 +39,8 @@ class Layout(db.Model):
     __tablename__ = 'layouts'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode)
-    spec = db.Column(JSONEncodedDict)
+    name = db.Column(db.Unicode, unique=True, nullable=False)
+    spec = db.Column(JSONEncodedDict, nullable=False)
 
     cabinets = relationship('Cabinet', back_populates='layout')
     items = relationship('LayoutItem', back_populates='layout')
@@ -68,9 +69,10 @@ class Cabinet(db.Model):
     __tablename__ = 'cabinets'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode)
+    name = db.Column(db.Unicode, unique=True, nullable=False)
     layout_id = db.Column(db.Integer,
-        db.ForeignKey('layouts.id', ondelete='CASCADE'))
+        db.ForeignKey('layouts.id', ondelete='CASCADE'),
+        nullable=False)
 
     layout = relationship('Layout', back_populates='cabinets')
     locations = relationship('Location', back_populates='cabinet')
@@ -98,9 +100,10 @@ class LayoutItem(db.Model):
     __tablename__ = 'layout_items'
 
     id = db.Column(db.Integer, primary_key=True)
-    spec_item_path = db.Column(JSONEncodedDict)
+    spec_item_path = db.Column(JSONEncodedDict, nullable=False)
     layout_id = db.Column(db.Integer,
-        db.ForeignKey('layouts.id', ondelete='CASCADE'))
+        db.ForeignKey('layouts.id', ondelete='CASCADE'),
+        nullable=False)
 
     layout = relationship('Layout', back_populates='items')
 
@@ -111,21 +114,26 @@ class Location(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     cabinet_id = db.Column(db.Integer,
-        db.ForeignKey('cabinets.id', ondelete='CASCADE'))
+        db.ForeignKey('cabinets.id', ondelete='CASCADE'),
+        nullable=False)
     layout_item_id = db.Column(db.Integer,
-        db.ForeignKey('layout_items.id', ondelete='CASCADE'))
+        db.ForeignKey('layout_items.id', ondelete='CASCADE'),
+        nullable=False)
 
     cabinet = relationship('Cabinet', back_populates='locations')
     layout_item = relationship('LayoutItem')
     drawer = relationship('Drawer', back_populates='location', uselist=False)
 
+    db.UniqueConstraint('cabinet_id', 'layout_item_id')
+
 class Drawer(db.Model):
     __tablename__ = 'drawers'
 
     id = db.Column(db.Integer, primary_key=True)
-    label = db.Column(db.Unicode)
+    label = db.Column(db.Unicode, nullable=False)
     location_id = db.Column(db.Integer,
-        db.ForeignKey('locations.id', ondelete='CASCADE'))
+        db.ForeignKey('locations.id', ondelete='CASCADE'),
+        nullable=False)
 
     location = relationship('Location', back_populates='drawer')
     collections = relationship('Collection', back_populates='drawer')
@@ -146,10 +154,26 @@ class Collection(db.Model):
     __tablename__ = 'collections'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode)
-    description = db.Column(db.Unicode)
+    name = db.Column(db.Unicode, unique=True, nullable=False)
+    description = db.Column(db.Unicode, nullable=False)
     content_count = db.Column(db.Integer)
     drawer_id = db.Column(db.Integer,
         db.ForeignKey('drawers.id', ondelete='SET NULL'))
 
     drawer = relationship('Drawer', back_populates='collections')
+    resource_links = relationship('ResourceLink', back_populates='collection')
+
+class ResourceLink(db.Model):
+    __tablename__ = 'resource_links'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode, nullable=False)
+    collection_id = db.Column(db.Integer,
+        db.ForeignKey('collections.id', ondelete='CASCADE'),
+        nullable=False)
+    url = db.Column(URLType, nullable=False)
+
+    collection = relationship('Collection', back_populates='resource_links')
+
+    db.UniqueConstraint('name', 'collection_id')
+
