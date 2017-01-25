@@ -4,7 +4,7 @@ $(document).ready(function() {
     var input = $(elem), list = $($(elem).data('target')), searchElems;
     searchElems = $(list).find('[data-search-text]');
 
-    input.on('change input', function() {
+    function runSearch() {
       var newVal = input.val().trim().toLowerCase(), searchTerms;
 
       // make sure all items in list are visible by default
@@ -23,6 +23,11 @@ $(document).ready(function() {
           return accum && (matchText.indexOf(val) !== -1);
         }, true);
       }).addClass('hidden');
-    });
+    }
+
+    input.on('change input', runSearch);
+
+    // handle initial value
+    runSearch();
   });
 });
