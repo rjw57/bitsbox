@@ -143,30 +143,38 @@ def collection(id):
 
 @blueprint.route('/collections/<int:id>/update', methods=['POST'])
 def collection_update(id):
-    collection = Collection.query.options(
-        joinedload(Collection.drawer).joinedload(Drawer.cabinet)
-    ).get(id)
+    collection = Collection.query.get(id)
     if collection is None:
         abort(404)
 
-    cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
-        order_by(Cabinet.name).all()
-    context = {
-        'cabinets': cabinets,
-        'drawers': {
-            'byCabinetId': dict(
-                (str(c.id), [
-                    {'id':str(d.id), 'label':d.label} for d in c.drawers
-                ])
-                for c in cabinets
-            ),
-        },
-        'collection': collection,
-    }
+    name, description = [
+        request.values.get(k, '') for k in 'name description'.split()]
 
-    return render_template('collection.html', **context)
+    if name == '' or description == '':
+        abort(400)
 
-@blueprint.route('/collections/new', methods=['GET', 'POST'])
+    count = int(request.values.get('count', 1))
+
+    drawer_id = request.values.get('drawer')
+    if drawer_id is not None:
+        drawer_id = int(drawer_id)
+        # check this drawer exists!
+        if Drawer.query.get(drawer_id) is None:
+            abort(400)
+
+    Collection.query.filter(Collection.id==collection.id).update({
+        Collection.name: name, Collection.description: description,
+        Collection.content_count: count,
+        Collection.drawer_id: drawer_id
+    })
+
+    db.session.commit()
+
+    flash('Collection "{}" updated.'.format(name))
+
+    return redirect(url_for('ui.collection', id=collection.id))
+
+@blueprint.route('/collections/new')
 def collection_create():
     if request.method == 'GET':
         cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
