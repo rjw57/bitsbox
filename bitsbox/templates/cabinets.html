@@ -2,34 +2,36 @@
 
 {% block content %}
 
-<div class="row">
-  <div class="col-md-3 col-sm-12">
-    <a class="btn btn-default" style="width:100%"
-        href="{{url_for('ui.cabinet_create')}}">
-      <span class="glyphicon glyphicon-plus"></span>
-      Add new cabinet
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-xs-3 col-sm-4 col-md-3">
+        <a class="btn btn-default" style="width: 100%"
+            href="{{url_for('ui.cabinet_create')}}">
+          <span class="glyphicon glyphicon-plus"></span>
+          <span class="hidden-xs">Add new cabinet</span>
+        </a>
+      </div>
+      <div class="col-xs-9 col-sm-8 col-md-9">
+      </div>
+    </div>
+  </div>
+
+  {% if not cabinets %}
+  <div class="panel-body">
+    <div class="text-center">There are no collections</div>
+  </div>
+  {% endif %}
+
+  <div class="list-group">
+    {% for c in cabinets %}
+      <a class="list-group-item" href="#">
+        {{ c.name }} ({{c.layout.name}})
+      </a>
     </a>
+    {% endfor %}
   </div>
 </div>
-
-<div class="divider-5"></div>
-
-{% if cabinets %}
-
-<div class="list-group">
-  {% for c in cabinets %}
-    <a class="list-group-item" href="#">
-      {{ c.name }} ({{c.layout.name}})
-    </a>
-  </a>
-  {% endfor %}
-</div>
-
-{% else %}
-
-<p>There are no cabinets</p>
-
-{% endif %}
 
 {% endblock %}
 

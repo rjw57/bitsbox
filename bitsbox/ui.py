@@ -96,7 +96,7 @@ def collections():
                 joinedload(Collection.drawer).
                 joinedload(Drawer.cabinet)
             ).\
-            order_by(Collection.name),
+            order_by(Collection.name).all(),
     }
     return render_template('collections.html', **context)
 

@@ -2,41 +2,55 @@
 
 {% block content %}
 
-<div class="row">
-  <div class="col-sm-10 col-xs-9 col-lg-11">
-    <input type="text" class="form-control" autofocus placeholder="Search" />
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-xs-3 col-sm-4 col-md-3">
+        <a class="btn btn-default" style="width: 100%"
+            href="{{url_for('ui.collection_create')}}">
+          <span class="glyphicon glyphicon-plus"></span>
+          <span class="hidden-xs">Add new collection</span>
+        </a>
+      </div>
+      <div class="col-xs-9 col-sm-8 col-md-9">
+        <div class="input-group">
+          <input type="text" class="form-control" autofocus placeholder="Search" />
+          <span class="input-group-addon" id="basic-addon2">
+            <span class="glyphicon glyphicon-search">
+              <span class="sr-only">Search</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-sm-2 col-xs-3 col-lg-1">
-    <a class="btn btn-default" style="width: 100%"
-        href="{{url_for('ui.collection_create')}}">
-      <span class="glyphicon glyphicon-plus">
-        <span class="sr-only">Add new collection</span>
-      </span>
-    </a>
+
+  {% if not collections %}
+  <div class="panel-body">
+    <div class="text-center">There are no collections</div>
   </div>
-</div>
+  {% endif %}
 
-<div class="divider-5"></div>
-
-<div class="list-group">
-  {% for c in collections %}
-  <a class="list-group-item" href="{{url_for('ui.collection', id=c.id)}}">
-      <span class="badge">{{ c.content_count }}</span>
-      <h4 class="list-group-item-heading">
-        {{c.name}}
-        {% if c.drawer %}
-        <small>
-          {{c.drawer.cabinet.name}},
-          {{c.drawer.label}}
-        </small>
-        {% endif %}
-      </h4>
-      <p class="list-group-item-text">
-        {{c.description}}
-      </p>
+  <div class="list-group">
+    {% for c in collections %}
+    <a class="list-group-item" href="{{url_for('ui.collection', id=c.id)}}">
+        <span class="badge">{{ c.content_count }}</span>
+        <h4 class="list-group-item-heading">
+          {{c.name}}
+          {% if c.drawer %}
+          <small>
+            {{c.drawer.cabinet.name}},
+            {{c.drawer.label}}
+          </small>
+          {% endif %}
+        </h4>
+        <p class="list-group-item-text">
+          {{c.description}}
+        </p>
+      </a>
     </a>
-  </a>
-  {% endfor %}
+    {% endfor %}
+  </div>
 </div>
 
 {% endblock %}

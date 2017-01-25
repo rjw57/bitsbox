@@ -1,8 +1,20 @@
 import collections
 import json
+from sqlite3 import Connection as SQLite3Connection
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event as sqlalchemy_event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import relationship
+
+# Ensure that sqlite honours foreign key constraints
+# http://stackoverflow.com/questions/2614984/a
+@sqlalchemy_event.listens_for(Engine, "connect")
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, SQLite3Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON;")
+        cursor.close()
 
 db = SQLAlchemy()
 
@@ -57,7 +69,8 @@ class Cabinet(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode)
-    layout_id = db.Column(db.Integer, db.ForeignKey('layouts.id'))
+    layout_id = db.Column(db.Integer,
+        db.ForeignKey('layouts.id', ondelete='CASCADE'))
 
     layout = relationship('Layout', back_populates='cabinets')
     locations = relationship('Location', back_populates='cabinet')
@@ -86,7 +99,8 @@ class LayoutItem(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     spec_item_path = db.Column(JSONEncodedDict)
-    layout_id = db.Column(db.Integer, db.ForeignKey('layouts.id'))
+    layout_id = db.Column(db.Integer,
+        db.ForeignKey('layouts.id', ondelete='CASCADE'))
 
     layout = relationship('Layout', back_populates='items')
 
@@ -96,8 +110,10 @@ class Location(db.Model):
     __tablename__ = 'locations'
 
     id = db.Column(db.Integer, primary_key=True)
-    cabinet_id = db.Column(db.Integer, db.ForeignKey('cabinets.id'))
-    layout_item_id = db.Column(db.Integer, db.ForeignKey('layout_items.id'))
+    cabinet_id = db.Column(db.Integer,
+        db.ForeignKey('cabinets.id', ondelete='CASCADE'))
+    layout_item_id = db.Column(db.Integer,
+        db.ForeignKey('layout_items.id', ondelete='CASCADE'))
 
     cabinet = relationship('Cabinet', back_populates='locations')
     layout_item = relationship('LayoutItem')
@@ -108,7 +124,8 @@ class Drawer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     label = db.Column(db.Unicode)
-    location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
+    location_id = db.Column(db.Integer,
+        db.ForeignKey('locations.id', ondelete='CASCADE'))
 
     location = relationship('Location', back_populates='drawer')
     collections = relationship('Collection', back_populates='drawer')
@@ -132,6 +149,7 @@ class Collection(db.Model):
     name = db.Column(db.Unicode)
     description = db.Column(db.Unicode)
     content_count = db.Column(db.Integer)
-    drawer_id = db.Column(db.Integer, db.ForeignKey('drawers.id'))
+    drawer_id = db.Column(db.Integer,
+        db.ForeignKey('drawers.id', ondelete='SET NULL'))
 
     drawer = relationship('Drawer', back_populates='collections')
