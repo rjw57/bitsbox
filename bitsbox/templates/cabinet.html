@@ -38,6 +38,31 @@
   </div>
 </form>
 
+{% macro layout_item(layout) %}
+
+{% if layout.type == "container" %}
+<div style="display: flex; {{layout.style}}">
+  {% for c in layout.children %}
+    {{ layout_item(c) }}
+  {% endfor %}
+</div>
+{% elif layout.type == "item" %}
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; {{layout.style}}" class="well">
+  <div>xxx</div>
+</div>
+{% endif %}
+
+{% endmacro %}
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">Drawers</h3></div>
+  <div class="panel-body">
+    <div style="display: flex; justify-content: center">
+      {{ layout_item(cabinet.layout.spec) }}
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" tabindex="-1" role="dialog" id="modal-delete">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
