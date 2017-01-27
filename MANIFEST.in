@@ -1,0 +1,2 @@
+recursive-include bitsbox/templates *
+recursive-include bitsbox/static *
