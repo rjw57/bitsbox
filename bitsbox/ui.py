@@ -11,7 +11,8 @@ from sqlalchemy.orm import joinedload
 from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink
 from .graphql import schema
 
-blueprint = Blueprint('ui', __name__)
+blueprint = Blueprint('ui', __name__,
+    static_folder='static/ui', template_folder='templates/ui')
 
 @blueprint.route('/')
 def index():
