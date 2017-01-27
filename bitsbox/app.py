@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_debugtoolbar import DebugToolbarExtension
 
 from .ui import blueprint as ui
 from .graphql import (
@@ -8,8 +7,6 @@ from .graphql import (
 )
 from .model import db, migrate
 from .cli import cli
-
-toolbar = DebugToolbarExtension()
 
 def create_app(config_filename=None):
     app = Flask(__name__)
@@ -26,6 +23,8 @@ def create_app(config_filename=None):
 
     # Things which should only be present in DEBUG-enabled apps
     if app.debug:
+        from flask_debugtoolbar import DebugToolbarExtension
+        toolbar = DebugToolbarExtension()
         toolbar.init_app(app)
 
     # GraphQL support
