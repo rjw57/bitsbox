@@ -22,6 +22,7 @@ def create_app(config_filename=None):
     app.cli.add_command(cli)
 
     # Things which should only be present in DEBUG-enabled apps
+    app.debug = app.config.get('DEBUG', False)
     if app.debug:
         from flask_debugtoolbar import DebugToolbarExtension
         toolbar = DebugToolbarExtension()
