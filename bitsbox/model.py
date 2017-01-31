@@ -2,6 +2,7 @@ import collections
 import json
 from sqlite3 import Connection as SQLite3Connection
 
+from flask_login import UserMixin
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event as sqlalchemy_event, MetaData
@@ -182,3 +183,9 @@ class ResourceLink(db.Model):
 
     db.UniqueConstraint('name', 'collection_id')
 
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)

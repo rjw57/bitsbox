@@ -6,22 +6,30 @@ from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash,
     Response
 )
+from flask_login import login_required
 from sqlalchemy.orm import joinedload
 
 from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink
 from .graphql import schema
+from .user import login_manager
 
 blueprint = Blueprint('ui', __name__, template_folder='templates/ui')
+
+@blueprint.route('/login')
+def login():
+    return render_template('login.html')
 
 @blueprint.route('/')
 def index():
     return redirect(url_for('ui.collections'))
 
 @blueprint.route('/export')
+@login_required
 def export():
     return render_template('export.html')
 
 @blueprint.route('/export/collections.csv')
+@login_required
 def export_collections():
     out = StringIO()
     w = csv.writer(out)
@@ -46,6 +54,7 @@ def export_collections():
     return Response(out.getvalue(), mimetype='text/csv')
 
 @blueprint.route('/export/resource_links.csv')
+@login_required
 def export_links():
     out = StringIO()
     w = csv.writer(out)
@@ -64,6 +73,7 @@ def export_links():
     return Response(out.getvalue(), mimetype='text/csv')
 
 @blueprint.route('/import', endpoint='import')
+@login_required
 def import_index():
     context = {
         'cabinets': Cabinet.query.order_by(Cabinet.name).all(),
@@ -71,6 +81,7 @@ def import_index():
     return render_template('import.html', **context)
 
 @blueprint.route('/import/collections', methods=['POST'])
+@login_required
 def import_collections():
     fobj = request.files.get('csv')
     if fobj is None:
@@ -130,6 +141,7 @@ def import_collections():
     return redirect(url_for('ui.import'))
 
 @blueprint.route('/import/links', methods=['POST'])
+@login_required
 def import_links():
     fobj = request.files.get('csv')
     if fobj is None:
@@ -181,6 +193,7 @@ def import_links():
     return redirect(url_for('ui.import'))
 
 @blueprint.route('/collections')
+@login_required
 def collections():
     context = {
         'collections': Collection.query.\
@@ -193,6 +206,7 @@ def collections():
     return render_template('collections.html', **context)
 
 @blueprint.route('/collections/<int:id>', methods=['GET', 'POST'])
+@login_required
 def collection(id):
     if request.method == 'GET':
         collection = Collection.query.options(
@@ -251,6 +265,7 @@ def collection(id):
     return redirect(url_for('ui.collection', id=collection.id))
 
 @blueprint.route('/collections/<int:id>/delete', methods=['POST'])
+@login_required
 def collection_delete(id):
     collection = Collection.query.get(id)
     if collection is None:
@@ -264,6 +279,7 @@ def collection_delete(id):
     return redirect(url_for('ui.collections'))
 
 @blueprint.route('/collections/new', methods=['GET', 'POST'])
+@login_required
 def collection_create():
     if request.method == 'GET':
         cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
@@ -303,6 +319,7 @@ def collection_create():
     return redirect(url_for('ui.collections'))
 
 @blueprint.route('/cabinets')
+@login_required
 def cabinets():
     context = {
         'cabinets': Cabinet.query.options(
@@ -315,6 +332,7 @@ def cabinets():
     return render_template('cabinets.html', **context)
 
 @blueprint.route('/cabinet/<int:id>', methods=['GET', 'POST'])
+@login_required
 def cabinet(id):
     if request.method == 'GET':
         cabinet = Cabinet.query.get(id)
@@ -344,6 +362,7 @@ def cabinet(id):
     return redirect(url_for('ui.cabinet', id=cabinet.id))
 
 @blueprint.route('/cabinet/<int:id>/delete', methods=['POST'])
+@login_required
 def cabinet_delete(id):
     cabinet = Cabinet.query.get(id)
     if cabinet is None:
@@ -357,6 +376,7 @@ def cabinet_delete(id):
     return redirect(url_for('ui.cabinets'))
 
 @blueprint.route('/cabinets/new', methods=['GET', 'POST'])
+@login_required
 def cabinet_create():
     if request.method == 'GET':
         context = {
@@ -380,6 +400,7 @@ def cabinet_create():
     return redirect(url_for('ui.cabinets'))
 
 @blueprint.route('/links/new', methods=['POST'])
+@login_required
 def link_create():
     collection = Collection.query.filter(
         Collection.id==int(request.values.get('collection_id'))).first()
@@ -399,6 +420,7 @@ def link_create():
     return redirect(url_for('ui.collection', id=collection.id))
 
 @blueprint.route('/link/<int:id>/delete', methods=['POST'])
+@login_required
 def link_delete(id):
     link = ResourceLink.query.options(
         joinedload(ResourceLink.collection)).filter(ResourceLink.id==id).first()

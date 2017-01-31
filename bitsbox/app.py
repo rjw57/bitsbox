@@ -7,6 +7,7 @@ from .graphql import (
 )
 from .model import db, migrate
 from .cli import cli
+from .user import login_manager
 
 def create_app(config_filename=None):
     app = Flask(__name__)
@@ -17,6 +18,9 @@ def create_app(config_filename=None):
 
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
+
+    login_manager.login_view = 'ui.login'
+    login_manager.init_app(app)
 
     app.register_blueprint(ui)
     app.cli.add_command(cli)
