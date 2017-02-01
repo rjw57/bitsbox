@@ -20,11 +20,24 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      {% if current_user.is_authenticated %}
+        <p class="navbar-text">
+          {% if current_user.picture_url %}
+            <img src="{{ current_user.picture_url }}"
+              class="nav profile-picture img-circle">
+          {% endif %}
+          {{ current_user.name }}
+        </p>
+      {% endif %}
+
       <ul class="nav navbar-nav navbar-right">
         <li><a href="{{url_for('ui.collections')}}">Collections</a></li>
         <li><a href="{{url_for('ui.cabinets')}}">Cabinets</a></li>
         <li><a href="{{url_for('ui.import')}}">Import</a></li>
         <li><a href="{{url_for('ui.export')}}">Export</a></li>
+        {% if current_user.is_authenticated %}
+          <li><a href="{{url_for('ui.logout')}}">Sign out</a></li>
+        {% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

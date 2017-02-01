@@ -7,7 +7,7 @@ from .graphql import (
 )
 from .model import db, migrate
 from .cli import cli
-from .user import login_manager
+from .user import login_manager, blueprint as login
 
 def create_app(config_filename=None):
     app = Flask(__name__)
@@ -23,6 +23,7 @@ def create_app(config_filename=None):
     login_manager.init_app(app)
 
     app.register_blueprint(ui)
+    app.register_blueprint(login)
     app.cli.add_command(cli)
 
     # Things which should only be present in DEBUG-enabled apps

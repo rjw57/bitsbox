@@ -9,6 +9,7 @@ install_requires = """
     flask-shell-ipython
     flask-sqlalchemy
 
+    google-api-python-client
     graphene>=1.0
     graphene_sqlalchemy
     sqlalchemy

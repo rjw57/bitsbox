@@ -189,3 +189,23 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode, nullable=False)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+    picture_url = db.Column(URLType)
+
+class GoogleUser(db.Model):
+    __tablename__ = 'google_users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    unique_id = db.Column(db.Unicode, nullable=False, unique=True)
+    email = db.Column(db.Unicode, nullable=False)
+    email_verified = db.Column(db.Boolean, nullable=False)
+    name = db.Column(db.Unicode, nullable=False)
+    picture_url = db.Column(URLType, nullable=False)
+    given_name = db.Column(db.Unicode, nullable=False)
+    family_name = db.Column(db.Unicode, nullable=False)
+    locale = db.Column(db.Unicode, nullable=False)
+
+    user_id = db.Column(db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False)
+
+    user = relationship('User')

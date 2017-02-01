@@ -1,7 +1,9 @@
 """Utility functions."""
-
 import base64
 import os
+from urllib.parse import urlparse, urljoin
+
+from flask import request
 
 _DEFAULT_NBYTES=32
 
@@ -18,3 +20,10 @@ try:
     from secrets import token_urlsafe
 except ImportError:
     token_urlsafe = _token_urlsafe
+
+# See http://flask.pocoo.org/snippets/62/
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+           ref_url.netloc == test_url.netloc

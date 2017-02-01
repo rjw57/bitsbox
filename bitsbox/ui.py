@@ -6,7 +6,7 @@ from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash,
     Response
 )
-from flask_login import login_required
+from flask_login import login_required, logout_user
 from sqlalchemy.orm import joinedload
 
 from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink
@@ -17,7 +17,13 @@ blueprint = Blueprint('ui', __name__, template_folder='templates/ui')
 
 @blueprint.route('/login')
 def login():
-    return render_template('login.html')
+    return render_template('login.html',
+        next=request.values.get('next'))
+
+@blueprint.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('ui.index'))
 
 @blueprint.route('/')
 def index():
