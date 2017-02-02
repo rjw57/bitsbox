@@ -77,6 +77,23 @@ def export_links():
 
     return Response(out.getvalue(), mimetype='text/csv')
 
+@blueprint.route('/export/tags.csv')
+@login_required
+def export_tags():
+    out = StringIO()
+    w = csv.writer(out)
+
+    w.writerow(['collection', 'tag'])
+    q = Collection.query.options(
+        joinedload(Collection.tags)).order_by(Collection.name)
+    for collection in q:
+        w.writerows([
+            [collection.name, tag.name]
+            for tag in collection.tags
+        ])
+
+    return Response(out.getvalue(), mimetype='text/csv')
+
 @blueprint.route('/import', endpoint='import')
 @login_required
 def import_index():
@@ -191,6 +208,55 @@ def import_links():
         n_added, 'link' if n_added == 1 else 'links')
     if n_updated > 0:
         m += ' and updated {}'.format(n_updated)
+    m += '.'
+
+    flash(m)
+
+    return redirect(url_for('ui.import'))
+
+@blueprint.route('/import/tags', methods=['POST'])
+@login_required
+def import_tags():
+    fobj = request.files.get('csv')
+    if fobj is None:
+        abort(400)
+    fobj = TextIOWrapper(fobj)
+
+    header = [h.lower() for h in next(csv.reader(fobj))]
+    reader = csv.DictReader(fobj, fieldnames=header)
+
+    n_added = 0
+    for row in reader:
+        collection_name, tag_name = [
+            row.get(k) for k in 'collection tag'.split()]
+
+        if collection_name is None or tag_name is None:
+            continue
+
+        # Try to get a collection for this link
+        collection = Collection.query.filter(
+            Collection.name==collection_name).first()
+
+        # Skip unknown collections
+        if collection is None:
+            continue
+
+        # Is there a tag already?
+        tag = Tag.query.filter(Tag.name==tag_name).first()
+
+        if tag is None:
+            # No existing tag, create one
+            tag = Tag(name=tag_name)
+            db.session.add(tag)
+            db.session.commit()
+
+        tag.collections.append(collection)
+        n_added += 1
+
+    db.session.commit()
+
+    m = 'Imported {} new {}'.format(
+        n_added, 'tag' if n_added == 1 else 'tags')
     m += '.'
 
     flash(m)
