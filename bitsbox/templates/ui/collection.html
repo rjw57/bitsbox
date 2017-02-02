@@ -64,6 +64,18 @@
               id="drawer-select" disabled></select>
           </div>
         </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="input-tags" class="control-label">Tags</label>
+            <div class="tagsinput-wrapper">
+              <select multiple id="input-tags" class="form-control" name="tags">
+                {% for tag in collection.tags %}
+                  <option selected value="{{tag.name}}">{{tag.name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -176,9 +188,30 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{url_for('static', filename='ui/js/collection_create.js')}}"></script>
+<script src="{{url_for('static', filename='ui/js/typeahead.bundle.js')}}"></script>
+<script src="{{url_for('static', filename='ui/js/bootstrap-tagsinput.min.js')}}"></script>
 <script>
 var DRAWER_DATA = {{ drawers | tojson }};
 var CURRENT_DRAWER = {{ collection.drawer.id | default('null') }};
+
+$(document).ready(function() {
+  var tagData = {{ tag_data | tojson }};
+  var tagBloodhound = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.whitespace,
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    local: tagData.tags
+  });
+  tagBloodhound.initialize();
+  $('#input-tags').tagsinput({
+    typeaheadjs: { source: tagBloodhound.ttAdapter() },
+  });
+});
+
 </script>
-<script src="{{url_for('static', filename='ui/js/collection_create.js')}}"></script>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{url_for('static', filename='ui/css/bootstrap-tagsinput.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='ui/css/typeahead.css')}}">
 {% endblock %}

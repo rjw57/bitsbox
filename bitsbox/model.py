@@ -84,7 +84,7 @@ class Cabinet(db.Model):
     locations = relationship('Location', back_populates='cabinet')
 
     drawers = relationship('Drawer',
-        secondary='join(Location, Drawer)', back_populates='cabinet')
+        secondary='locations', back_populates='cabinet')
 
     def add_locations(self, session):
         for item in LayoutItem.query.filter_by(layout=self.layout):
@@ -104,6 +104,7 @@ class Cabinet(db.Model):
 
 class LayoutItem(db.Model):
     __tablename__ = 'layout_items'
+    __table_args__ = (db.UniqueConstraint('layout_id', 'spec_item_path'),)
 
     id = db.Column(db.Integer, primary_key=True)
     spec_item_path = db.Column(JSONEncodedDict, nullable=False)
@@ -113,10 +114,9 @@ class LayoutItem(db.Model):
 
     layout = relationship('Layout', back_populates='items')
 
-    db.UniqueConstraint('layout_id', 'spec_item_path')
-
 class Location(db.Model):
     __tablename__ = 'locations'
+    __table_args__ = (db.UniqueConstraint('cabinet_id', 'layout_item_id'),)
 
     id = db.Column(db.Integer, primary_key=True)
     cabinet_id = db.Column(db.Integer,
@@ -129,8 +129,6 @@ class Location(db.Model):
     cabinet = relationship('Cabinet', back_populates='locations')
     layout_item = relationship('LayoutItem')
     drawer = relationship('Drawer', back_populates='location', uselist=False)
-
-    db.UniqueConstraint('cabinet_id', 'layout_item_id')
 
 class Drawer(db.Model):
     __tablename__ = 'drawers'
@@ -145,7 +143,7 @@ class Drawer(db.Model):
     collections = relationship('Collection', back_populates='drawer')
 
     cabinet = relationship('Cabinet',
-        secondary='join(Location, Cabinet)', uselist=False,
+        secondary='locations', uselist=False,
         back_populates='drawers')
 
     @classmethod
@@ -168,9 +166,12 @@ class Collection(db.Model):
 
     drawer = relationship('Drawer', back_populates='collections')
     resource_links = relationship('ResourceLink', back_populates='collection')
+    tags = relationship('Tag',
+        secondary='tag_assignments', back_populates='collections')
 
 class ResourceLink(db.Model):
     __tablename__ = 'resource_links'
+    __table_args__ = (db.UniqueConstraint('name', 'collection_id'),)
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode, nullable=False)
@@ -180,8 +181,6 @@ class ResourceLink(db.Model):
     url = db.Column(URLType, nullable=False)
 
     collection = relationship('Collection', back_populates='resource_links')
-
-    db.UniqueConstraint('name', 'collection_id')
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -209,3 +208,30 @@ class GoogleUser(db.Model):
         nullable=False)
 
     user = relationship('User')
+
+class Tag(db.Model):
+    __tablename__ = 'tags'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode, nullable=False, unique=True)
+
+    collections = relationship('Collection',
+        secondary='tag_assignments', back_populates='tags')
+
+    # A query which matches only tags used by some collection
+    @classmethod
+    def query_used(cls):
+        return cls.query.filter(cls.collections.any())
+
+class TagAssignment(db.Model):
+    __tablename__ = 'tag_assignments'
+    __table_args__ = (
+        db.UniqueConstraint('tag_id', 'collection_id',
+            name='uq_tag_assignments_name_collection_id'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    tag_id = db.Column(db.Integer,
+        db.ForeignKey('tags.id', ondelete='CASCADE'), nullable=False)
+    collection_id = db.Column(db.Integer,
+        db.ForeignKey('collections.id', ondelete='CASCADE'), nullable=False)

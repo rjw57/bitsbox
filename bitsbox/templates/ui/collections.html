@@ -43,14 +43,22 @@
         data-search-text="
           {{c.name}} {{c.description}} {{cabinet_name}} {{drawer_label}}
           {{c.resource_links | join(' ', attribute='name')}}
+          {{c.tags | join(' ', attribute='name')}}
         ">
         {% if c.resource_links %}
-          <div class="pull-right">
-            {% for link in c.resource_links | sort(attribute='name') %}
-              <a class="btn btn-default btn-xs" href="{{link.url}}" target="_blank">
-                {{link.name}}
-              </a>
-            {% endfor %}
+          <div class="pull-right text-right">
+            <div class="collection-links">
+              {% for link in c.resource_links | sort(attribute='name') %}
+                <a class="btn btn-default btn-xs" href="{{link.url}}" target="_blank">
+                  {{link.name}}
+                </a>
+              {% endfor %}
+            </div>
+            <div class="collection-tags">
+              {% for tag in c.tags | sort(attribute='name') %}
+                <span class="label label-tag">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
           </div>
         {% endif %}
         <a href="{{url_for('ui.collection', id=c.id)}}">

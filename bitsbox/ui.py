@@ -9,7 +9,7 @@ from flask import (
 from flask_login import login_required, logout_user
 from sqlalchemy.orm import joinedload
 
-from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink
+from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink, Tag
 from .user import login_manager
 
 blueprint = Blueprint('ui', __name__, template_folder='templates/ui')
@@ -204,7 +204,8 @@ def collections():
         'collections': Collection.query.\
             options(
                 joinedload(Collection.resource_links),
-                joinedload(Collection.drawer).joinedload(Drawer.cabinet)
+                joinedload(Collection.drawer).joinedload(Drawer.cabinet),
+                joinedload(Collection.tags),
             ).\
             order_by(Collection.name).all(),
     }
@@ -216,13 +217,15 @@ def collection(id):
     if request.method == 'GET':
         collection = Collection.query.options(
             joinedload(Collection.drawer).joinedload(Drawer.cabinet),
-            joinedload(Collection.resource_links)
+            joinedload(Collection.resource_links),
+            joinedload(Collection.tags)
         ).get(id)
         if collection is None:
             abort(404)
 
         cabinets = Cabinet.query.options(joinedload(Cabinet.drawers)).\
             order_by(Cabinet.name).all()
+
         context = {
             'cabinets': cabinets,
             'drawers': {
@@ -234,6 +237,7 @@ def collection(id):
                 ),
             },
             'collection': collection,
+            'tag_data': { 'tags': [t.name for t in Tag.query_used()] },
         }
 
         return render_template('collection.html', **context)
@@ -257,11 +261,21 @@ def collection(id):
         if Drawer.query.get(drawer_id) is None:
             abort(400)
 
+    tag_objects = []
+    for tag_name in request.values.getlist('tags'):
+        tag = Tag.query.filter(Tag.name==tag_name).first()
+        if tag is None:
+            tag = Tag(name=tag_name)
+            db.session.add(tag)
+        tag_objects.append(tag)
+
     Collection.query.filter(Collection.id==collection.id).update({
         Collection.name: name, Collection.description: description,
         Collection.content_count: count,
         Collection.drawer_id: drawer_id
     })
+
+    Collection.query.get(collection.id).tags = tag_objects
 
     db.session.commit()
 
