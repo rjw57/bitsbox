@@ -10,3 +10,4 @@ dist
 *.sqlite
 .eggs
 bitsbox/frontend/static
+config.py
