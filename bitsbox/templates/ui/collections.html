@@ -34,12 +34,12 @@
   </div>
   {% endif %}
 
-  <div class="list-group" id="search-list">
+  <ul class="list-group" id="search-list">
     {% for c in collections %}
     {% with %}
       {% set cabinet_name = c.drawer.cabinet.name if c.drawer else None %}
       {% set drawer_label = c.drawer.label if c.drawer else None %}
-      <a class="list-group-item" href="{{url_for('ui.collection', id=c.id)}}"
+      <li class="list-group-item clickable-list-item"
         data-search-text="
           {{c.name}} {{c.description}} {{cabinet_name}} {{drawer_label}}
           {{c.resource_links | join(' ', attribute='name')}}
@@ -47,23 +47,27 @@
         {% if c.resource_links %}
           <div class="pull-right">
             {% for link in c.resource_links | sort(attribute='name') %}
-            <span class="label label-default">{{link.name}}</span>
+              <a class="btn btn-default btn-xs" href="{{link.url}}" target="_blank">
+                {{link.name}}
+              </a>
             {% endfor %}
           </div>
         {% endif %}
-        <h4 class="list-group-item-heading">
-          {{c.content_count}} &times; {{c.name}}
-          {% if drawer_label %}
-            <small>{{cabinet_name}}, {{drawer_label}}</small>
-          {% endif %}
-        </h4>
-        <p class="list-group-item-text">
-          {{c.description}}
-        </p>
-      </a>
+        <a href="{{url_for('ui.collection', id=c.id)}}">
+          <h4 class="list-group-item-heading">
+            {{c.content_count}} &times; {{c.name}}
+            {% if drawer_label %}
+              <small>{{cabinet_name}}, {{drawer_label}}</small>
+            {% endif %}
+          </h4>
+          <p class="list-group-item-text">
+            {{c.description}}
+          </p>
+        </a>
+      </li>
     {% endwith %}
     {% endfor %}
-  </div>
+  </ul>
 </div>
 
 {% endblock %}
