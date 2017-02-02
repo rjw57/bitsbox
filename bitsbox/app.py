@@ -1,10 +1,6 @@
 from flask import Flask
 
 from .ui import blueprint as ui
-from .graphql import (
-    graphql_blueprint as graphql,
-    graphiql_blueprint as graphiql
-)
 from .model import db, migrate
 from .cli import cli
 from .user import login_manager, blueprint as login
@@ -32,9 +28,5 @@ def create_app(config_filename=None):
         from flask_debugtoolbar import DebugToolbarExtension
         toolbar = DebugToolbarExtension()
         toolbar.init_app(app)
-
-    # GraphQL support
-    app.register_blueprint(graphql, url_prefix='/graphql')
-    app.register_blueprint(graphiql, url_prefix='/graphiql')
 
     return app

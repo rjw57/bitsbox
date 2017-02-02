@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 install_requires = """
     flask
     flask-debugtoolbar
-    flask-graphql
     flask-login
     flask-migrate
     flask-shell-ipython

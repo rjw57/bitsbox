@@ -10,7 +10,6 @@ from flask_login import login_required, logout_user
 from sqlalchemy.orm import joinedload
 
 from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink
-from .graphql import schema
 from .user import login_manager
 
 blueprint = Blueprint('ui', __name__, template_folder='templates/ui')
