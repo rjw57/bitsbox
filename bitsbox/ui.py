@@ -9,6 +9,7 @@ from flask import (
 from flask_login import login_required, logout_user
 from sqlalchemy.orm import joinedload
 
+from . import export as bbexport
 from .model import db, Collection, Cabinet, Drawer, Layout, ResourceLink, Tag
 from .user import login_manager
 
@@ -37,62 +38,27 @@ def export():
 @login_required
 def export_collections():
     out = StringIO()
-    w = csv.writer(out)
-
-    w.writerow(['name', 'description', 'count', 'cabinet', 'drawer'])
-    q = Collection.query.\
-        options(
-            joinedload(Collection.drawer).
-            joinedload(Drawer.cabinet)
-        ).\
-        order_by(Collection.name)
-    w.writerows([
-        [
-            collection.name, collection.description,
-            collection.content_count,
-            collection.drawer.cabinet.name if collection.drawer is not None else '',
-            collection.drawer.label if collection.drawer is not None else ''
-        ]
-        for collection in q
-    ])
-
+    bbexport.write_collections_csv(out)
     return Response(out.getvalue(), mimetype='text/csv')
 
 @blueprint.route('/export/resource_links.csv')
 @login_required
 def export_links():
     out = StringIO()
-    w = csv.writer(out)
-
-    w.writerow(['collection', 'name', 'url'])
-    q = ResourceLink.query.\
-        options(
-            joinedload(ResourceLink.collection)
-        ).\
-        order_by(ResourceLink.name)
-    w.writerows([
-        [link.collection.name, link.name, link.url]
-        for link in q
-    ])
-
+    bbexport.write_links_csv(out)
     return Response(out.getvalue(), mimetype='text/csv')
 
 @blueprint.route('/export/tags.csv')
 @login_required
 def export_tags():
     out = StringIO()
-    w = csv.writer(out)
-
-    w.writerow(['collection', 'tag'])
-    q = Collection.query.options(
-        joinedload(Collection.tags)).order_by(Collection.name)
-    for collection in q:
-        w.writerows([
-            [collection.name, tag.name]
-            for tag in collection.tags
-        ])
-
+    bbexport.write_tags_csv(out)
     return Response(out.getvalue(), mimetype='text/csv')
+
+@blueprint.route('/export/google_sheet')
+@login_required
+def export_google_sheet():
+    return render_template('ui/export_google_sheet.html')
 
 @blueprint.route('/import', endpoint='import')
 @login_required

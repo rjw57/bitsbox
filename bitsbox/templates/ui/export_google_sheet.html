@@ -1,0 +1,82 @@
+{% extends '_layout/base.html' %}
+
+{% block content %}
+
+{# Content to display while loading Google APIs #}
+<div class="hidden-on-load show">
+  Loading Google API&hellip;
+</div>
+
+{# Content to display after APIs loaded #}
+<div class="shown-on-load hidden">
+  <div class="show-when-signed-in hidden">
+    <div class="page-header"><h1>Export to Google Sheet</h1></div>
+
+    <p>
+      <button class="btn btn-lg btn-default" id="export-new-sheet">
+        Export to new Sheet
+      </button>
+
+      <button class="btn btn-lg btn-default" id="export-existing-sheet">
+        Export to existing Sheet
+      </button>
+    </p>
+
+    <p>
+      <button id="signout-button" class="btn btn-default">
+        Sign out
+      </button>
+    </p>
+  </div>
+
+  <div class="show-when-signed-out show">
+    <div class="jumbotron">
+      <h1>Authorisation Required</h1>
+      <p>
+        {{ config.SITE_NAME }} needs to be explicitly authorised to export data
+        to Google Sheets.
+      </p>
+      <p>
+        <button id="authorize-button" class="btn btn-lg btn-primary">
+          Authorise {{ config.SITE_NAME }} to access Google Sheets
+        </button>
+      </p>
+  </div>
+</div>
+
+<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog"
+    aria-labelledby="confirm-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="confirm-modal-label">Confirm Overwrite</h4>
+      </div>
+      <div class="modal-body">
+        This will overwrite the selected spreadsheet,
+        "<span class="overwrite-name"></span>", with the contents of the
+        database.
+        <strong>This will delete any existing data in the spreadsheet.</strong>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="overwrite-confirm">
+          Overwrite spreadsheet "<span class="overwrite-name"></span>"
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+var GOOGLE_CLIENT_ID='{{config.GOOGLE_CLIENT_ID}}';
+var GOOGLE_API_KEY='{{config.GOOGLE_API_KEY}}';
+</script>
+<script src="{{url_for('static', filename='ui/js/export_google_sheet.js')}}"></script>
+<script async defer src="https://apis.google.com/js/api.js"
+    onload="this.onload=function(){};onGapiLoad()"
+    onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+{% endblock %}
