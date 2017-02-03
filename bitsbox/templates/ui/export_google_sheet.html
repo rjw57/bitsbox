@@ -12,21 +12,43 @@
   <div class="show-when-signed-in hidden">
     <div class="page-header"><h1>Export to Google Sheet</h1></div>
 
-    <p>
-      <button class="btn btn-lg btn-default" id="export-new-sheet">
-        Export to new Sheet
-      </button>
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#existing-sheet"
+          aria-controls="existing-sheet" role="tab" data-toggle="tab">
+            Choose existing sheet</a></li>
+      <li role="presentation"><a href="#new-sheet"
+          aria-controls="new-sheet" role="tab" data-toggle="tab">
+            Create new sheet</a></li>
+      <li role="presentation"><a href="#signout"
+          aria-controls="signout" role="tab" data-toggle="tab">
+            Disconnect</a></li>
+    </ul>
 
-      <button class="btn btn-lg btn-default" id="export-existing-sheet">
-        Export to existing Sheet
-      </button>
-    </p>
+    <div class="divider-5"></div>
 
-    <p>
-      <button id="signout-button" class="btn btn-default">
-        Sign out
-      </button>
-    </p>
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="existing-sheet">
+        <p>Select an existing spreadsheet from your Google Drive. The contents
+        of the selected spreadsheet will be <strong>overwritten</strong> with
+        data from this database.</p>
+        <button class="btn btn-default" id="export-existing-sheet">
+          Select from Google Drive&hellip;
+        </button>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="new-sheet">
+        Create new sheet
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="signout">
+        <p>
+          Should you not want {{ config.SITE_NAME }} to continue to have access
+          to your Google Drive, you may revoke access.
+        </p>
+        <button id="signout-button" class="btn btn-default">
+          Disconnect from Google Drive
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="show-when-signed-out show">
