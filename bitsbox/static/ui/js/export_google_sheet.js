@@ -62,7 +62,7 @@ var registerButtonEvents = gapiAvailable.then(function() {
     var name = $('#sheet-name').val().trim();
     event.preventDefault(); // stop normal form submission
     if(name === '') { alert('Enter a spreadsheet name'); return; }
-    $('#sheet-name').val(''); // clear name field
+    $('#new-sheet-form').trigger('reset');
     exportToSpreadsheet({ name: name });
   });
 });
