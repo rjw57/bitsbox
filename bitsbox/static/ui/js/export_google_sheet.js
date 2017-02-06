@@ -58,9 +58,11 @@ var registerSignInButtonEvents = gapiAvailable.then(function() {
 var registerButtonEvents = gapiAvailable.then(function() {
   $('.need-gapi').prop('disabled', false);
 
-  $('#create-new-sheet').click(function() {
+  $('#new-sheet-form').submit(function(event) {
     var name = $('#sheet-name').val().trim();
+    event.preventDefault(); // stop normal form submission
     if(name === '') { alert('Enter a spreadsheet name'); return; }
+    $('#sheet-name').val(''); // clear name field
     exportToSpreadsheet({ name: name });
   });
 });

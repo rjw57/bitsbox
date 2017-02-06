@@ -36,15 +36,17 @@
         </button>
       </div>
       <div role="tabpanel" class="tab-pane" id="new-sheet">
-        <div class="form-group">
-          <label for="sheet-name">Name</label>
-          <input type="text" class="form-control" name="name" id="sheet-name"
-            required placeholder="Bitsbox export">
-        </div>
+        <form id="new-sheet-form" action="">
+          <div class="form-group">
+            <label for="sheet-name">Name</label>
+            <input type="text" class="form-control" name="name" id="sheet-name"
+              required placeholder="Bitsbox export">
+          </div>
 
-        <button type="button" disabled class="disable-on-export btn btn-primary need-gapi" id="create-new-sheet">
-          Export data to new Google Sheet
-        </button>
+          <button type="submit" disabled class="disable-on-export btn btn-primary need-gapi">
+            Export data to new Google Sheet
+          </button>
+        </form>
       </div>
 
       <div role="tabpanel" class="tab-pane" id="signout">
