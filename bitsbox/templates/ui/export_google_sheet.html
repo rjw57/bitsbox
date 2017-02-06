@@ -31,12 +31,20 @@
         <p>Select an existing spreadsheet from your Google Drive. The contents
         of the selected spreadsheet will be <strong>overwritten</strong> with
         data from this database.</p>
-        <button class="btn btn-default" id="export-existing-sheet">
+        <button type="button" disabled class="disable-on-export btn btn-primary need-gapi" id="export-existing-sheet">
           Select from Google Drive&hellip;
         </button>
       </div>
       <div role="tabpanel" class="tab-pane" id="new-sheet">
-        Create new sheet
+        <div class="form-group">
+          <label for="sheet-name">Name</label>
+          <input type="text" class="form-control" name="name" id="sheet-name"
+            required placeholder="Bitsbox export">
+        </div>
+
+        <button type="button" disabled class="disable-on-export btn btn-primary need-gapi" id="create-new-sheet">
+          Export data to new Google Sheet
+        </button>
       </div>
 
       <div role="tabpanel" class="tab-pane" id="signout">
@@ -44,7 +52,7 @@
           Should you not want {{ config.SITE_NAME }} to continue to have access
           to your Google Drive, you may revoke access.
         </p>
-        <button id="signout-button" class="btn btn-default">
+        <button type="button" id="signout-button" class="btn btn-default">
           Disconnect from Google Drive
         </button>
       </div>
@@ -82,9 +90,23 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-danger" id="overwrite-confirm">
+        <button type="button" class="disable-on-export btn btn-danger" id="overwrite-confirm">
           Overwrite "<span class="overwrite-name"></span>"
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="export-modal" tabindex="-1" role="dialog"
+    aria-labelledby="exporting-label">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="exporting-label">Exporting&hellip;</h4>
+      </div>
+      <div class="modal-body">
+        <p>Please wait. Exporting content to spreadsheet&hellip;</p>
       </div>
     </div>
   </div>
@@ -96,6 +118,7 @@
 <script>
 var GOOGLE_CLIENT_ID='{{config.GOOGLE_CLIENT_ID}}';
 var GOOGLE_API_KEY='{{config.GOOGLE_API_KEY}}';
+var GOOGLE_OFFLINE_CODE_ENDPOINT='{{url_for('ui.export_google_sheet_do_export')}}';
 </script>
 <script src="{{url_for('static', filename='ui/js/export_google_sheet.js')}}"></script>
 <script async defer src="https://apis.google.com/js/api.js"

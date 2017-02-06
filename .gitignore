@@ -11,3 +11,4 @@ dist
 .eggs
 bitsbox/frontend/static
 config.py
+client_secret.json

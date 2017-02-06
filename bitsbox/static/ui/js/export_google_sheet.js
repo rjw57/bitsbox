@@ -55,6 +55,16 @@ var registerSignInButtonEvents = gapiAvailable.then(function() {
   });
 });
 
+var registerButtonEvents = gapiAvailable.then(function() {
+  $('.need-gapi').prop('disabled', false);
+
+  $('#create-new-sheet').click(function() {
+    var name = $('#sheet-name').val().trim();
+    if(name === '') { alert('Enter a spreadsheet name'); return; }
+    exportToSpreadsheet({ name: name });
+  });
+});
+
 // Called when sign in status changes
 function onSigninStatusChange(isSignedIn) {
   // Toggle visibility of UI components
@@ -104,12 +114,13 @@ function onCurrentUserChange(user) {
         if(!match) {
           console.warning('Document URL did not match regex:', doc[Document.URL]);
         }
+
         spreadsheetId = match[1];
 
         // Wire up onclick handler
         $('#overwrite-confirm').click(function() {
           $('#confirm-modal').modal('hide');
-          exportToSpreadsheet(spreadsheetId);
+          exportToSpreadsheet({ spreadsheetId: spreadsheetId });
         });
 
         // Show modal.
@@ -120,7 +131,6 @@ function onCurrentUserChange(user) {
       // Show a picker
       var picker = new google.picker.PickerBuilder().
         addView(google.picker.ViewId.SPREADSHEETS).
-        //setOrigin(window.location.protocol + '//' + window.location.host).
         setOAuthToken(oauthToken).
         setDeveloperKey(GOOGLE_API_KEY).
         setCallback(pickerCallback).
@@ -131,17 +141,52 @@ function onCurrentUserChange(user) {
 }
 
 // Called when a spreadsheet should be overwritten
-function exportToSpreadsheet(spreadsheetId) {
-  gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: spreadsheetId
-  }).then(function(response) {
-    console.log(response);
+function exportToSpreadsheet(options) {
+  $('.disable-on-export').prop('disabled', true);
+  $('#export-modal').modal('show');
+
+  Promise.resolve(gapi.auth2.getAuthInstance().grantOfflineAccess(
+    {'redirect_url': 'postmessage'})).
+  then(function(r) {
+    var code = r.code;
+
+    if(!code) {
+      throw new Error('No code');
+    }
+
+    // Send code to server
+    $.ajax({
+      type: 'POST',
+      url: GOOGLE_OFFLINE_CODE_ENDPOINT,
+      data: {
+        code: code,
+        spreadsheet_id: options.spreadsheetId,
+        name: options.name
+      },
+    }).then(function(data) {
+      if(data.error) {
+        throw new Error(data.error.message);
+      }
+
+      if(!data.response) {
+        throw new Error('Unexpected response');
+      }
+
+      console.log('Got:', data);
+    });
+  }).
+  catch(function(err) {
+    console.error('Error:', err);
+  }).
+  then(function() {
+    $('#export-modal').modal('hide');
+    $('.disable-on-export').prop('disabled', false);
   });
 }
 
 // Toggle display of loading/on load content
 Promise.all([
-  registerAuthCallback, registerSignInButtonEvents
+  registerAuthCallback, registerSignInButtonEvents, registerButtonEvents
 ]).then(function() {
   $('.hidden-on-load').removeClass('show').addClass('hidden');
   $('.shown-on-load').removeClass('hidden').addClass('show');

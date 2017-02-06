@@ -2,11 +2,14 @@ import csv
 from io import StringIO, TextIOWrapper
 import json
 
+from apiclient import discovery
 from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash,
-    Response
+    Response, jsonify, current_app
 )
 from flask_login import login_required, logout_user
+import httplib2
+from oauth2client import client
 from sqlalchemy.orm import joinedload
 
 from . import export as bbexport
@@ -59,6 +62,66 @@ def export_tags():
 @login_required
 def export_google_sheet():
     return render_template('ui/export_google_sheet.html')
+
+# From http://flask.pocoo.org/docs/0.12/patterns/apierrors/
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@blueprint.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+@blueprint.route('/export/google_sheet/do_export', methods=['POST'])
+@login_required
+def export_google_sheet_do_export():
+    spreadsheet_id = request.values.get('spreadsheet_id')
+    name = request.values.get('name')
+    code = request.values.get('code')
+
+    if code is None:
+        raise InvalidUsage('no code specified')
+
+    # Exchange auth code for access token
+    credentials = client.credentials_from_clientsecrets_and_code(
+        current_app.config.get('GOOGLE_CLIENT_SECRET_FILE'),
+        [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'profile'
+        ], code
+    )
+
+    http_auth = credentials.authorize(httplib2.Http())
+    sheet_service = discovery.build('sheets', 'v4', http=http_auth)
+
+    if spreadsheet_id is None or spreadsheet_id == '':
+        # No spreadsheet id specified -> create one
+        if name is None or name == '':
+            raise InvalidUsage('no name specified for spreadsheet')
+        response = sheet_service.spreadsheets().create(body={
+            'properties': { 'title': name }
+        }).execute()
+
+        spreadsheet_id = response['spreadsheetId']
+
+    print('************ SSID: ', spreadsheet_id)
+
+    return jsonify(response={
+        'spreadsheetId': spreadsheet_id
+    })
 
 @blueprint.route('/import', endpoint='import')
 @login_required
