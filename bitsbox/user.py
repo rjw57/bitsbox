@@ -17,8 +17,11 @@ def load_user(user_id):
         return None
     return User.query.get(user_id)
 
-@blueprint.route('/token/google', methods=['POST'])
+@blueprint.route('/token/google', methods=['POST', 'GET'])
 def google_token():
+    if request.method == 'GET':
+        return redirect(url_for('ui.index'))
+
     # Parse and verify Google token as authentic
     idinfo = _parse_and_verify_token(request.values['token'])
 
