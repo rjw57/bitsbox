@@ -462,7 +462,7 @@ def collection_create():
 
     flash('Collection "{}" created'.format(name))
 
-    return redirect(url_for('ui.collections'))
+    return redirect(url_for('ui.collection', id=collection.id))
 
 @blueprint.route('/cabinets')
 @login_required
