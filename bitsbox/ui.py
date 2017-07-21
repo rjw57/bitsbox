@@ -5,7 +5,7 @@ import json
 from apiclient import discovery
 from flask import (
     Blueprint, render_template, abort, request, redirect, url_for, flash,
-    Response, jsonify, current_app
+    Response, jsonify, current_app, send_file
 )
 from flask_login import login_required, logout_user
 import httplib2
@@ -32,10 +32,26 @@ def logout():
 def index():
     return redirect(url_for('ui.collections'))
 
+def get_sqlite_path():
+    """Returns path of sqlite database if that is being used. Otherwise return
+    None.
+
+    """
+    uri = current_app.config.get('SQLALCHEMY_DATABASE_URI')
+    if uri is None:
+        return None
+
+    prefix = 'sqlite://'
+    if not uri.startswith(prefix):
+        return None
+
+    return uri[len(prefix):]
+
 @blueprint.route('/export')
 @login_required
 def export():
-    return render_template('export.html')
+    have_sqlite = get_sqlite_path() is not None
+    return render_template('export.html', have_sqlite=have_sqlite)
 
 @blueprint.route('/export/collections.csv')
 @login_required
@@ -43,6 +59,14 @@ def export_collections():
     out = StringIO()
     bbexport.write_collections_csv(out)
     return Response(out.getvalue(), mimetype='text/csv')
+
+@blueprint.route('/export/bitsbox.sqlite')
+@login_required
+def export_sqlite():
+    db_path = get_sqlite_path()
+    if db_path is None:
+        abort(404)
+    return send_file(db_path, mimetype='application/x-sqlite3')
 
 @blueprint.route('/export/resource_links.csv')
 @login_required

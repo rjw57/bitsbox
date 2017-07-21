@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="page-header">
-  <h1>CSV Data Export</h1>
+  <h1>Data Export</h1>
 </div>
 
 <div class="row">
@@ -22,6 +22,13 @@
       Tags
     </a>
   </div>
+  {% if have_sqlite %}
+  <div class="col-md-3 col-sm-4 col-xs-6">
+    <a href="{{url_for('ui.export_sqlite')}}" class="btn btn-default" style="width: 100%">
+      Sqlite DB
+    </a>
+  </div>
+  {% endif %}
 </div>
 
 {% endblock %}
