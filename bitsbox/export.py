@@ -2,7 +2,7 @@ import csv
 
 from sqlalchemy.orm import joinedload
 
-from .model import Collection, Drawer
+from .model import Collection, Drawer, ResourceLink
 
 def write_collections_csv(output_fobj):
     w = csv.writer(output_fobj)
