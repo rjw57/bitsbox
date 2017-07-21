@@ -422,9 +422,17 @@ def collection_create():
 
     content_count = int(request.values.get('count', 0))
 
+    drawer_id = request.values.get('drawer')
+    if drawer_id is not None:
+        drawer_id = int(drawer_id)
+        # check this drawer exists!
+        if Drawer.query.get(drawer_id) is None:
+            abort(400)
+
     # Create the collection
     collection = Collection(
-        name=name, description=description, content_count=content_count)
+        name=name, description=description, content_count=content_count,
+        drawer_id=drawer_id)
     db.session.add(collection)
     db.session.commit()
 
