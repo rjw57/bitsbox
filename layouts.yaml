@@ -5,6 +5,15 @@ _specs:
   - &boxsm
     type: item
     style: 'width: 5em; height: 3.8em; margin: 0.5em'
+  - &cabinet6
+    type: container
+    children:
+      - *boxmd
+      - *boxmd
+      - *boxmd
+      - *boxmd
+      - *boxmd
+      - *boxmd
   - &row4
     type: container
     children:
@@ -51,3 +60,5 @@ layouts:
     name: "44 drawer"
   - spec: *cabinet64
     name: "64 drawer"
+  - spec: *cabinet6
+    name: "6 drawer vertical"
