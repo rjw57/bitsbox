@@ -1,0 +1,5 @@
+-rrequirements.txt
+
+flask-fixtures
+flask-testing
+nose

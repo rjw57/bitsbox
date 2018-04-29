@@ -1,0 +1,19 @@
+.git
+
+# Python bytecode
+**/*.pyc
+**/__pycache__
+
+# Setuptools
+build
+dist
+*.egg-info
+
+**/*.sqlite
+.eggs
+bitsbox/frontend/static
+config.py
+client_secret.json
+
+config.py
+**/*secret*
